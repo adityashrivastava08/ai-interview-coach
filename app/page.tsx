@@ -22,8 +22,8 @@ export default function HomePage() {
   }, [session, status, router]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-black text-white">
-      <p className="text-zinc-400 text-sm tracking-widest animate-pulse">
+    <div className="flex min-h-screen items-center justify-center px-4">
+      <p className="rounded-full border border-cyan-200/80 bg-white/80 px-5 py-3 text-sm font-semibold tracking-widest text-slate-600 shadow-[0_18px_70px_-28px_rgba(14,116,144,0.75)] backdrop-blur animate-pulse">
         INITIALIZING INTERVAI SECURE ROUTER...
       </p>
     </div>

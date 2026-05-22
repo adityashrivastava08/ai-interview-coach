@@ -17,7 +17,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="h-full">
-      <body className={`${inter.className} min-h-full bg-black text-white`}>
+      <body className={`${inter.className} min-h-full bg-background text-foreground`}>
         {/* Wrapping children inside AuthProvider lets every page know who is signed in */}
         <AuthProvider>
           {children}

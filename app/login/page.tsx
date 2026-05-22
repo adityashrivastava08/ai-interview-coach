@@ -37,26 +37,33 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-black text-white p-4">
-      <div className="w-full max-w-md border border-zinc-800 bg-zinc-950 p-8 rounded-xl shadow-2xl">
-        <h2 className="text-2xl font-bold tracking-tight text-center mb-2">Welcome back</h2>
-        <p className="text-sm text-zinc-400 text-center mb-6">Sign in to continue practicing</p>
-
-        {errorMessage && (
-          <div className="mb-4 p-3 rounded bg-red-950/50 border border-red-900 text-red-400 text-sm whitespace-pre-wrap break-words">
-            {errorMessage}
+    <div className="flex min-h-screen items-center justify-center p-4 sm:p-6">
+      <div className="w-full max-w-md overflow-hidden rounded-2xl border border-white/80 bg-white/85 shadow-[0_28px_90px_-38px_rgba(15,23,42,0.55)] backdrop-blur">
+        <div className="h-2 bg-[linear-gradient(90deg,#0f766e,#06b6d4,#fb7185,#f59e0b)]" />
+        <div className="p-6 sm:p-8">
+          <div className="mb-7 text-center">
+            <p className="mb-3 inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-emerald-700">
+              IntervAI
+            </p>
+            <h2 className="mb-2 text-3xl font-black tracking-tight text-slate-950">Welcome back</h2>
+            <p className="text-sm text-slate-500">Sign in to continue practicing</p>
           </div>
-        )}
+
+          {errorMessage && (
+            <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700 whitespace-pre-wrap break-words">
+              {errorMessage}
+            </div>
+          )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wider mb-1">
+            <label className="mb-1.5 block text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
               Email Address
             </label>
             <input
               type="email"
               required
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-zinc-500 transition-colors"
+              className="w-full rounded-lg border border-cyan-100 bg-cyan-50/50 px-3 py-2.5 text-sm text-slate-950 shadow-inner shadow-cyan-100/40 outline-none transition focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100"
               placeholder="you@example.com"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -64,13 +71,13 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wider mb-1">
+            <label className="mb-1.5 block text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
               Password
             </label>
             <input
               type="password"
               required
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-zinc-500 transition-colors"
+              className="w-full rounded-lg border border-cyan-100 bg-cyan-50/50 px-3 py-2.5 text-sm text-slate-950 shadow-inner shadow-cyan-100/40 outline-none transition focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100"
               placeholder="********"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -80,18 +87,19 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-zinc-100 hover:bg-zinc-200 text-black font-medium py-2 rounded-lg text-sm mt-2 transition-colors disabled:opacity-50 cursor-pointer"
+            className="mt-2 w-full cursor-pointer rounded-lg bg-teal-700 py-2.5 text-sm font-bold text-white shadow-lg shadow-teal-900/20 transition hover:bg-teal-800 disabled:opacity-50"
           >
             {loading ? "Signing In..." : "Sign In"}
           </button>
         </form>
 
-        <p className="mt-5 text-center text-sm text-zinc-400">
+        <p className="mt-5 text-center text-sm text-slate-500">
           Need an account?{" "}
-          <Link href="/register" className="text-white underline underline-offset-4">
+          <Link href="/register" className="font-semibold text-teal-700 underline decoration-teal-300 underline-offset-4 hover:text-teal-900">
             Sign up
           </Link>
         </p>
+        </div>
       </div>
     </div>
   );
