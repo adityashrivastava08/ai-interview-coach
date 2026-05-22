@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -8,15 +8,44 @@ export default function InterviewWorkspace() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  // Data states for tracking interactive code and chats
   const [currentQuestion] = useState(
     "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice."
   );
   const [userCode, setUserCode] = useState(`public int[] twoSum(int[] nums, int target) {\n    // Write your Java code here\n    return new int[] {};\n}`);
   const [chatMessages, setChatMessages] = useState([
-    { role: "ai", text: "Welcome Aditya! Let's start with a classic Data Structures problem. Look at the prompt on the left, draft your solution in the editor space, and click submit when you're ready." }
+    { role: "ai", text: "Establishing secure analytics record... Please wait." }
   ]);
   const [loading, setLoading] = useState(false);
+  const [activeInterviewId, setActiveInterviewId] = useState<string | null>(null);
+
+  // TRIGGER DATABASE LOG ENTRY CAPTURE UPON INTERFACE INITIALIZATION
+  useEffect(() => {
+    if (status !== "authenticated" || !session?.user?.email) return;
+
+    const initializeSessionDocument = async () => {
+      try {
+        const response = await fetch("/api/interview/init", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: session.user.email, topic: "Java & DSA" })
+        });
+        const data = await response.json();
+        
+        if (response.ok && data.interviewId) {
+          setActiveInterviewId(data.interviewId);
+          setChatMessages([
+            { role: "ai", text: `Welcome Aditya! Secure session tracking id verified. Review the problem model layout panel, structure your technical solution method, and submit whenever you are ready.` }
+          ]);
+        } else {
+          throw new Error(data.error);
+        }
+      } catch (err) {
+        setChatMessages([{ role: "ai", text: "⚠️ System Logging warning: Workspace running in sandbox mode. Core performance analytics metrics will not compile to cloud clusters." }]);
+      }
+    };
+
+    initializeSessionDocument();
+  }, [status, session]);
 
   if (status === "loading") return <div className="flex min-h-screen items-center justify-center px-4 font-mono text-sm font-semibold tracking-widest text-slate-600">LOADING WORKSPACE...</div>;
   if (!session) { router.push("/login"); return null; }
@@ -26,35 +55,26 @@ export default function InterviewWorkspace() {
     if (loading) return;
 
     setLoading(true);
-    // 1. Immediately add the user's action to the visual message log
     setChatMessages((prev) => [...prev, { role: "user", text: "Code submitted for evaluation." }]);
 
     try {
-      // 2. Fire the live request to our backend API pipeline route
       const response = await fetch("/api/interview/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           problemPrompt: currentQuestion,
           userCode: userCode,
+          interviewId: activeInterviewId // Send tracking variable along with runtime text parameters
         }),
       });
 
       const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
 
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to retrieve response.");
-      }
-
-      // 3. Append the real AI feedback straight into the chat view window
       setChatMessages((prev) => [...prev, { role: "ai", text: data.text }]);
 
     } catch (err) {
-      // Fallback message if your API key is missing or server is turned off
-      setChatMessages((prev) => [
-        ...prev,
-        { role: "ai", text: "🛑 System Connection Error: Unable to contact the AI evaluator engine. Please ensure your local server is active and your secret keys are configured." }
-      ]);
+      setChatMessages((prev) => [...prev, { role: "ai", text: "🛑 System Connection Error: Unable to record entry submission logs." }]);
     } finally {
       setLoading(false);
     }
@@ -62,7 +82,6 @@ export default function InterviewWorkspace() {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-slate-950 font-sans text-slate-100">
-      {/* Upper Header Ribbon Bar */}
       <header className="flex min-h-16 shrink-0 flex-wrap items-center justify-between gap-3 border-b border-cyan-300/15 bg-slate-950/95 px-4 py-3 shadow-2xl shadow-cyan-950/30 backdrop-blur md:px-6">
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-sm font-black tracking-wide text-white">IntervAI Technical Playground</span>
@@ -73,10 +92,7 @@ export default function InterviewWorkspace() {
         </button>
       </header>
 
-      {/* Main Split Screen Container */}
       <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
-        
-        {/* Left Panel: Prompt Display & Evaluation Feed */}
         <div className="flex min-h-0 flex-1 flex-col border-b border-cyan-300/15 bg-slate-900/70 lg:w-1/2 lg:border-b-0 lg:border-r">
           <div className="max-h-[40vh] overflow-y-auto border-b border-cyan-300/15 bg-[linear-gradient(135deg,rgba(6,182,212,0.16),rgba(15,23,42,0.2),rgba(245,158,11,0.1))] p-4 sm:p-6">
             <span className="mb-2 block font-mono text-xs uppercase tracking-widest text-cyan-200/70">Active Problem Prompt</span>
@@ -105,7 +121,6 @@ export default function InterviewWorkspace() {
           </div>
         </div>
 
-        {/* Right Panel: Code Sandbox Editor Area */}
         <div className="flex min-h-0 flex-1 flex-col bg-slate-950 lg:w-1/2">
           <div className="flex h-11 shrink-0 items-center justify-between border-b border-violet-300/15 bg-violet-300/10 px-4">
             <span className="font-mono text-xs text-violet-100">Solution.java</span>
@@ -132,7 +147,6 @@ export default function InterviewWorkspace() {
             </div>
           </form>
         </div>
-
       </div>
     </div>
   );
