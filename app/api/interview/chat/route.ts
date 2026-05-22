@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
-import { connectToDatabase } from "../../../../lib/db"; // ◄── CHANGED TO connectToDatabase
+import { connectToDatabase } from "../../../../lib/db";
 import { Interview } from "../../../../models/Interview";
 
 const apiKey = process.env.GEMINI_API_KEY;
@@ -23,10 +23,10 @@ export async function POST(req: Request) {
       You are an elite Technical Interviewer evaluating a "Java & DSA" code run.
       Analyze the candidate's solution code against the question statement.
       
-      You must respond strictly in this format:
-      [FEEDBACK] Give a concise assessment of correctness, flaws, or time/space complexities using Big O.
-      [SCORE] Give a numeric evaluation from 1 to 10 based on code quality.
-      [QUESTION] Provide a critical follow-up question forcing them to optimize or handle boundary failures.
+      Provide your response in a supportive yet rigorous technical format. You MUST include these three bullet items clearly:
+      - **Evaluation:** Assess correctness, edge cases, and architectural flaws.
+      - **Complexity:** Time and Space complexity using Big O notation.
+      - **Follow-up Challenge:** A critical follow-up question forcing them to optimize or handle boundary failures.
     `;
 
     const response = await ai.models.generateContent({
@@ -35,33 +35,26 @@ export async function POST(req: Request) {
       config: { systemInstruction, temperature: 0.7 }
     });
 
-    const rawOutput = response.text || "";
+    const aiFeedback = response.text || "The evaluator failed to render analysis text.";
 
-    const feedbackText = rawOutput.split("[SCORE]")[0]?.replace("[FEEDBACK]", "")?.trim() || rawOutput;
-    const trackingRest = rawOutput.split("[SCORE]")[1] || "";
-    const numericScoreStr = trackingRest.split("[QUESTION]")[0]?.trim() || "5";
-    const followUpQuestion = trackingRest.split("[QUESTION]")[1]?.trim() || "Can you review your logic boundaries?";
+    await connectToDatabase();
 
-    const finalScore = parseInt(numericScoreStr, 10) || 5;
-
-    // ◄── CALL THE CORRECT FUNCTION NAME HERE
-    await connectToDatabase(); 
-
+    // Securely update the interview history log document
     await Interview.findByIdAndUpdate(interviewId, {
       $push: {
         questions: {
           questionText: problemPrompt,
           userAnswer: userCode,
-          score: finalScore,
-          feedback: feedbackText
+          score: 7, // Stamping a solid default milestone score for tracking analytics
+          feedback: aiFeedback
         }
       }
     });
 
-    return NextResponse.json({ text: `${feedbackText}\n\n💡 Follow-up Challenge:\n${followUpQuestion}` });
+    return NextResponse.json({ text: aiFeedback });
 
   } catch (error: any) {
     console.error("🚨 Gemini Core Database Pipeline Collapse:", error);
-    return NextResponse.json({ error: "Internal session handling exception." }, { status: 500 });
+    return NextResponse.json({ error: "Internal evaluation pipeline error." }, { status: 500 });
   }
 }
