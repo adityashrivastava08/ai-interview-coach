@@ -2,16 +2,43 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function InterviewWorkspace() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // URL parameters se chosen track read karo (Default: Java & DSA)
+  const currentTrack = searchParams.get("track") || "Java & DSA";
 
-  const [currentQuestion] = useState(
-    "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice."
-  );
-  const [userCode, setUserCode] = useState(`public int[] twoSum(int[] nums, int target) {\n    // Write your Java code here\n    return new int[] {};\n}`);
+  // Dynamic Content & Code Template Repository Config
+  const trackConfigurations: Record<string, { prompt: string; code: string; label: string; file: string }> = {
+    "Java & DSA": {
+      label: "Topic: Java & DSA",
+      file: "Solution.java",
+      prompt: "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice.",
+      code: "public int[] twoSum(int[] nums, int target) {\n    // Write your Java code here\n    return new int[] {};\n}"
+    },
+    "MERN Full-Stack": {
+      label: "Topic: MERN Full-Stack",
+      file: "server.js",
+      prompt: "Create a secure Express.js API endpoint router POST '/api/users/login' that validates an incoming email parameter, utilizes bcrypt to check password hashes from a MongoDB User collection schema, and signs a JWT access token if verification succeeds.",
+      code: "const router = require('express').Router();\nconst bcrypt = require('bcrypt');\nconst jwt = require('jsonwebtoken');\nconst User = require('../models/User');\n\nrouter.post('/login', async (req, res) => {\n    // Implement secure MERN login authentication middleware\n});\n\nmodule.exports = router;"
+    },
+    "Android Development": {
+      label: "Topic: Android Studio Core",
+      file: "MainActivity.java",
+      prompt: "Implement a lifecycle logging tracking block inside an Android Activity class. Override onCreate(), onStart(), and onResume() templates to pass unique tracking string triggers to Android Logcat console, and invoke an Explicit Intent routing flow to explicit secondary target class ProfileActivity.class.",
+      code: "package com.example.intervai;\n\nimport android.content.Intent;\nimport android.os.Bundle;\nimport android.util.Log;\nimport androidx.appcompat.app.AppCompatActivity;\n\npublic class MainActivity extends AppCompatActivity {\n    // Implement Android lifecycle methods and explicit intents here\n}"
+    }
+  };
+
+  const activeConfig = trackConfigurations[currentTrack] || trackConfigurations["Java & DSA"];
+
+  // States initialized dynamically based on selected path
+  const [currentQuestion] = useState(activeConfig.prompt);
+  const [userCode, setUserCode] = useState(activeConfig.code);
   const [chatMessages, setChatMessages] = useState([
     { role: "ai", text: "Establishing secure analytics record... Please wait." }
   ]);
@@ -19,8 +46,6 @@ export default function InterviewWorkspace() {
   const [loading, setLoading] = useState(false);
   const [isEnding, setIsEnding] = useState(false);
   const [activeInterviewId, setActiveInterviewId] = useState<string | null>(null);
-
-  // Modal State for Final Report Cards
   const [reportCard, setReportCard] = useState<{ score: number; summary: string } | null>(null);
 
   const feedBottomRef = useRef<HTMLDivElement>(null);
@@ -37,7 +62,10 @@ export default function InterviewWorkspace() {
         const response = await fetch("/api/interview/init", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: session.user.email, topic: "Java & DSA" })
+          body: JSON.stringify({ 
+            email: session.user.email, 
+            topic: currentTrack // Dynamic assignment written to MongoDB logs
+          })
         });
         const data = await response.json();
         
@@ -55,7 +83,7 @@ export default function InterviewWorkspace() {
     };
 
     initializeSessionDocument();
-  }, [status, session]);
+  }, [status, session, currentTrack]);
 
   if (status === "loading") return <div className="flex min-h-screen items-center justify-center px-4 font-mono text-sm font-semibold tracking-widest text-slate-600">LOADING WORKSPACE...</div>;
   if (!session) { router.push("/login"); return null; }
@@ -104,7 +132,6 @@ export default function InterviewWorkspace() {
     executePipelineQuery(cleanText, "");
   };
 
-  // TRIGGER POST INTERVIEW DIAGNOSTIC SESSION CLOSURE
   const handleEndSession = async () => {
     if (!activeInterviewId || chatMessages.length < 2) {
       router.push("/dashboard");
@@ -146,7 +173,9 @@ export default function InterviewWorkspace() {
       <header className="flex min-h-16 shrink-0 flex-wrap items-center justify-between gap-3 border-b border-cyan-300/15 bg-slate-950/95 px-4 py-3 shadow-2xl shadow-cyan-950/30 backdrop-blur md:px-6">
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-sm font-black tracking-wide text-white">IntervAI Technical Playground</span>
-          <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-2.5 py-1 text-xs font-semibold text-cyan-100">Topic: Java & DSA</span>
+          <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-2.5 py-1 text-xs font-semibold text-cyan-100">
+            {activeConfig.label}
+          </span>
         </div>
         <button 
           onClick={handleEndSession} 
@@ -164,7 +193,7 @@ export default function InterviewWorkspace() {
         <div className="flex min-h-0 flex-1 flex-col border-b border-cyan-300/15 bg-slate-900/70 lg:w-1/2 lg:border-b-0 lg:border-r">
           <div className="max-h-[30vh] overflow-y-auto border-b border-cyan-300/15 bg-[linear-gradient(135deg,rgba(6,182,212,0.16),rgba(15,23,42,0.2),rgba(245,158,11,0.1))] p-4 sm:p-6">
             <span className="mb-2 block font-mono text-xs uppercase tracking-widest text-cyan-200/70">Active Problem Prompt</span>
-            <h3 className="mb-3 text-lg font-bold text-white">Two Sum Indices</h3>
+            <h3 className="mb-3 text-lg font-bold text-white">Interview Objective</h3>
             <p className="rounded-lg border border-white/10 bg-slate-950/70 p-4 font-mono text-sm leading-relaxed text-slate-200 shadow-inner shadow-cyan-950/30">
               {currentQuestion}
             </p>
@@ -211,7 +240,7 @@ export default function InterviewWorkspace() {
         {/* Right Panel: Code Sandbox Editor Area */}
         <div className="flex min-h-0 flex-1 flex-col bg-slate-950 lg:w-1/2">
           <div className="flex h-11 shrink-0 items-center justify-between border-b border-violet-300/15 bg-violet-300/10 px-4">
-            <span className="font-mono text-xs text-violet-100">Solution.java</span>
+            <span className="font-mono text-xs text-violet-100">{activeConfig.file}</span>
             <span className="h-2 w-2 rounded-full bg-emerald-500" />
           </div>
 
