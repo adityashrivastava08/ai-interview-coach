@@ -17,11 +17,14 @@ export default function InterviewWorkspace() {
   ]);
   const [textReply, setTextReply] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isEnding, setIsEnding] = useState(false);
   const [activeInterviewId, setActiveInterviewId] = useState<string | null>(null);
+
+  // Modal State for Final Report Cards
+  const [reportCard, setReportCard] = useState<{ score: number; summary: string } | null>(null);
 
   const feedBottomRef = useRef<HTMLDivElement>(null);
 
-  // Automatically scroll down when new chat text displays
   useEffect(() => {
     feedBottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatMessages]);
@@ -57,12 +60,10 @@ export default function InterviewWorkspace() {
   if (status === "loading") return <div className="flex min-h-screen items-center justify-center px-4 font-mono text-sm font-semibold tracking-widest text-slate-600">LOADING WORKSPACE...</div>;
   if (!session) { router.push("/login"); return null; }
 
-  // REUSABLE UNIFIED NETWORK TRANSACTION HANDLER
   const executePipelineQuery = async (currentUserInputText: string, standardCodePayload: string) => {
-    if (loading) return;
+    if (loading || isEnding) return;
     setLoading(true);
 
-    // Append the user's input to the chat log local array state
     const updatedHistory = [...chatMessages, { role: "user", text: currentUserInputText }];
     setChatMessages(updatedHistory);
 
@@ -103,16 +104,56 @@ export default function InterviewWorkspace() {
     executePipelineQuery(cleanText, "");
   };
 
+  // TRIGGER POST INTERVIEW DIAGNOSTIC SESSION CLOSURE
+  const handleEndSession = async () => {
+    if (!activeInterviewId || chatMessages.length < 2) {
+      router.push("/dashboard");
+      return;
+    }
+
+    setIsEnding(true);
+
+    try {
+      const response = await fetch("/api/interview/end", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          interviewId: activeInterviewId,
+          chatHistory: chatMessages
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
+
+      setReportCard({
+        score: data.finalScore,
+        summary: data.feedbackSummary
+      });
+
+    } catch (err) {
+      alert("Failed to compute performance analytics. Returning safely to controller deck.");
+      router.push("/dashboard");
+    } finally {
+      setIsEnding(false);
+    }
+  };
+
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-slate-950 font-sans text-slate-100">
+    <div className="flex h-screen flex-col overflow-hidden bg-slate-950 font-sans text-slate-100 relative">
+      
       {/* Upper Navigation Header Ribbon */}
       <header className="flex min-h-16 shrink-0 flex-wrap items-center justify-between gap-3 border-b border-cyan-300/15 bg-slate-950/95 px-4 py-3 shadow-2xl shadow-cyan-950/30 backdrop-blur md:px-6">
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-sm font-black tracking-wide text-white">IntervAI Technical Playground</span>
           <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-2.5 py-1 text-xs font-semibold text-cyan-100">Topic: Java & DSA</span>
         </div>
-        <button onClick={() => router.push("/dashboard")} className="cursor-pointer rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:border-rose-300/30 hover:bg-rose-300/10 hover:text-white">
-          Close Session
+        <button 
+          onClick={handleEndSession} 
+          disabled={isEnding}
+          className="cursor-pointer rounded-lg border border-rose-500/20 bg-rose-500/10 px-4 py-1.5 text-xs font-black text-rose-300 transition hover:bg-rose-500 hover:text-white disabled:opacity-40"
+        >
+          {isEnding ? "Compiling Metrics..." : "✕ End Session & Grade"}
         </button>
       </header>
 
@@ -129,7 +170,6 @@ export default function InterviewWorkspace() {
             </p>
           </div>
 
-          {/* Interactive Scrollable Feed Bubble Display Area */}
           <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
             <span className="block font-mono text-xs uppercase tracking-widest text-emerald-200/70">AI Feedback Evaluation Feed</span>
             {chatMessages.map((msg, idx) => (
@@ -149,19 +189,18 @@ export default function InterviewWorkspace() {
             <div ref={feedBottomRef} />
           </div>
 
-          {/* NEW CRITICAL FEATURE: Floating Text Chat Input Dialogue Console Deck */}
           <form onSubmit={handleTextChatSubmit} className="border-t border-cyan-300/15 bg-slate-950 p-4 flex gap-2 shrink-0">
             <input
               type="text"
               value={textReply}
               onChange={(e) => setTextReply(e.target.value)}
               placeholder="Reply to the interviewer's follow-up challenge question..."
-              disabled={loading}
+              disabled={loading || isEnding}
               className="flex-1 rounded-xl border border-white/10 bg-slate-900 px-4 py-2.5 text-sm text-white focus:border-cyan-500 focus:outline-none disabled:opacity-50"
             />
             <button
               type="submit"
-              disabled={loading || !textReply.trim()}
+              disabled={loading || isEnding || !textReply.trim()}
               className="rounded-xl bg-cyan-500 hover:bg-cyan-400 px-5 text-xs font-bold text-slate-950 transition disabled:opacity-30 cursor-pointer"
             >
               Send
@@ -183,21 +222,51 @@ export default function InterviewWorkspace() {
               value={userCode}
               onChange={(e) => setUserCode(e.target.value)}
               spellCheck="false"
+              disabled={isEnding}
             />
 
             <div className="flex shrink-0 items-center justify-end border-t border-white/10 bg-slate-900/90 p-4">
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || isEnding}
                 className="cursor-pointer rounded-lg bg-amber-300 px-6 py-2.5 text-xs font-black text-slate-950 shadow-lg shadow-amber-950/25 transition hover:bg-amber-200 disabled:opacity-40"
               >
-                {loading ? "Evaluating Code..." : "Submit Answer"}
+                {loading ? "Evaluating..." : "Submit Answer"}
               </button>
             </div>
           </form>
         </div>
-
       </div>
+
+      {/* NEW PREMIUM INTERACTIVE INTERVIEW REPORT CARD MODAL OVERLAY */}
+      {reportCard && (
+        <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+          <div className="bg-slate-900 border border-cyan-500/30 max-w-xl w-full rounded-2xl p-6 sm:p-8 shadow-2xl shadow-cyan-500/10 max-h-[90vh] overflow-y-auto">
+            <span className="block font-mono text-[10px] tracking-widest text-cyan-400 uppercase font-black text-center mb-1">Performance Audit Complete</span>
+            <h2 className="text-2xl font-black text-white text-center mb-6">Simulation Evaluation Report</h2>
+            
+            <div className="flex flex-col items-center mb-6">
+              <span className="text-xs font-mono text-slate-400 uppercase tracking-wider mb-1">Assigned Readiness Score</span>
+              <div className="h-24 w-24 rounded-full bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border-2 border-cyan-400 flex items-center justify-center shadow-xl shadow-cyan-950">
+                <span className="text-4xl font-black text-white font-mono">{reportCard.score}<span className="text-xs text-slate-500 font-normal">/10</span></span>
+              </div>
+            </div>
+
+            <div className="bg-slate-950/60 border border-white/5 rounded-xl p-4 sm:p-5 mb-6 shadow-inner">
+              <span className="block font-mono text-[10px] text-slate-500 uppercase tracking-widest mb-2 font-bold">Bar Raiser Feedback Executive Summary</span>
+              <p className="text-sm text-slate-300 leading-relaxed font-sans whitespace-pre-line">{reportCard.summary}</p>
+            </div>
+
+            <button 
+              onClick={() => router.push("/dashboard")}
+              className="w-full cursor-pointer rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 py-3 text-xs font-black text-slate-950 shadow-lg shadow-cyan-500/20 transition hover:opacity-90 text-center block"
+            >
+              Return to Controller Deck Dashboard
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
