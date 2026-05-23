@@ -3,6 +3,18 @@
 import React, { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  Legend
+} from "recharts";
 
 interface QuestionLog {
   questionText: string;
@@ -17,12 +29,18 @@ interface InterviewSession {
   questions: QuestionLog[];
 }
 
+interface ChartDataPoint {
+  name: string;
+  score: number;
+}
+
 export default function UserDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
   const [interviews, setInterviews] = useState<InterviewSession[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
+  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
 
   // Core Math Stats Aggregation States
   const [stats, setStats] = useState({
@@ -43,19 +61,41 @@ export default function UserDashboard() {
           const historyData: InterviewSession[] = data.history;
           setInterviews(historyData);
 
-          // Calculate metrics based on real database records
           if (historyData.length > 0) {
             let totalQuestionsEvaluated = 0;
             let combinedScoreSum = 0;
             let peakScore = 0;
 
-            historyData.forEach((session) => {
+            // Chart data array prepare karne ke liye (Oldest to Newest chronology me set karenge)
+            const graphPoints: ChartDataPoint[] = [];
+
+            // Slice karke reverse kar rahe hain taaki chronologically right-direction graph bane
+            [...historyData].reverse().forEach((session, index) => {
+              let sessionScoreSum = 0;
+              let sessionQuestionsCount = 0;
+
               session.questions.forEach((q) => {
                 totalQuestionsEvaluated++;
                 combinedScoreSum += q.score;
                 if (q.score > peakScore) peakScore = q.score;
+
+                sessionScoreSum += q.score;
+                sessionQuestionsCount++;
               });
+
+              // Har session ka average score nikal kar graph point banayenge
+              if (sessionQuestionsCount > 0) {
+                const dateObj = new Date(session.createdAt);
+                const formattedDate = dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                
+                graphPoints.push({
+                  name: `Sess ${index + 1} (${formattedDate})`,
+                  score: Math.round((sessionScoreSum / sessionQuestionsCount) * 10) / 10
+                });
+              }
             });
+
+            setChartData(graphPoints);
 
             setStats({
               totalSessions: historyData.length,
@@ -121,6 +161,49 @@ export default function UserDashboard() {
             <span className="mt-2 block text-3xl font-black tracking-tight text-amber-300">{stats.highestScore} <span className="text-xs text-slate-500 font-normal">/ 10</span></span>
           </div>
         </div>
+
+        {/* NEW FEATURE: Graphical Analytics Section */}
+        {!loadingHistory && chartData.length > 0 && (
+          <div className="grid gap-6 md:grid-cols-2 mb-8">
+            {/* Trend Performance Line Chart */}
+            <div className="rounded-2xl border border-white/5 bg-slate-900/20 p-6 backdrop-blur">
+              <h3 className="text-sm font-bold text-white mb-4 font-mono uppercase tracking-wider text-cyan-400/80">Score Progression Trend</h3>
+              <div className="h-64 w-full text-xs">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" opacity={0.4} />
+                    <XAxis dataKey="name" stroke="#64748b" tickLine={false} />
+                    <YAxis domain={[0, 10]} stroke="#64748b" tickLine={false} />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: "#0f172a", borderColor: "#22d3ee", borderRadius: "8px" }}
+                      labelStyle={{ color: "#94a3b8" }}
+                    />
+                    <Line type="monotone" dataKey="score" stroke="#06b6d4" strokeWidth={3} activeDot={{ r: 6 }} name="Score" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Session Analytics Bar Chart */}
+            <div className="rounded-2xl border border-white/5 bg-slate-900/20 p-6 backdrop-blur">
+              <h3 className="text-sm font-bold text-white mb-4 font-mono uppercase tracking-wider text-amber-400/80">Session Comparison Matrix</h3>
+              <div className="h-64 w-full text-xs">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" opacity={0.4} />
+                    <XAxis dataKey="name" stroke="#64748b" tickLine={false} />
+                    <YAxis domain={[0, 10]} stroke="#64748b" tickLine={false} />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: "#0f172a", borderColor: "#f59e0b", borderRadius: "8px" }}
+                      labelStyle={{ color: "#94a3b8" }}
+                    />
+                    <Bar dataKey="score" fill="#f59e0b" radius={[4, 4, 0, 0]} name="Avg Score" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Recent Evaluation Log Feed Matrix */}
         <div className="rounded-2xl border border-white/5 bg-slate-900/20 p-6 backdrop-blur">
