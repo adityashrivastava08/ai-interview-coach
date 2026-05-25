@@ -46,9 +46,11 @@ export default function UserDashboard() {
   const [interviews, setInterviews] = useState<InterviewSession[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
-  const [selectedTrack, setSelectedTrack] = useState("Java & DSA");
+  
+  // 🔥 Sync Fix: Default state ko backend tracks ke generic IDs se match kiya ('java-dsa')
+  const [selectedTrack, setSelectedTrack] = useState("java-dsa");
 
-  /* 🔥 EDIT LOGIC NOTE: HISTORICAL AUDIT MODAL HOOKS CONTROLLER */
+  /* 🔥 HISTORICAL AUDIT MODAL HOOKS CONTROLLER */
   const [selectedAuditSession, setSelectedAuditSession] = useState<InterviewSession | null>(null);
   const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
 
@@ -59,25 +61,25 @@ export default function UserDashboard() {
   });
 
   // ==========================================
-  // 🗺️ AVAILABLE INTERVIEW TRACKS GRID SPEC
+  // 🗺️ AVAILABLE INTERVIEW TRACKS GRID SPEC (UPDATED MATCHING SYSTEM)
   // ==========================================
   const tracks = [
     {
-      id: "Java & DSA",
+      id: "java-dsa", // Backend map key
       title: "Java & DSA Track",
       desc: "Master core algorithms, arrays, sliding windows, and competitive programming frameworks.",
       icon: "☕",
       color: "from-amber-500/20 to-orange-500/10 border-amber-500/30 text-amber-400"
     },
     {
-      id: "MERN Full-Stack",
+      id: "mern", // Backend map key
       title: "MERN Full-Stack Developer",
       desc: "Evaluate your full-stack capability on Express routers, secure JWT authentication, and MongoDB scaling.",
       icon: "🌐",
       color: "from-cyan-500/20 to-blue-500/10 border-cyan-500/30 text-cyan-400"
     },
     {
-      id: "Android Development",
+      id: "android", // Backend map key
       title: "Android Core Engineering",
       desc: "Test mobile app lifecycle states, explicit intents logic, and native Java component handling.",
       icon: "📱",
@@ -119,13 +121,16 @@ export default function UserDashboard() {
               let sessionScoreSum = 0;
               let sessionQuestionsCount = 0;
 
-              session.questions.forEach((q) => {
-                totalQuestionsEvaluated++;
-                combinedScoreSum += q.score;
-                if (q.score > peakScore) peakScore = q.score;
-                sessionScoreSum += q.score;
-                sessionQuestionsCount++;
-              });
+              // Check guard rule if questions exist before loop
+              if (session.questions && Array.isArray(session.questions)) {
+                session.questions.forEach((q) => {
+                  totalQuestionsEvaluated++;
+                  combinedScoreSum += q.score;
+                  if (q.score > peakScore) peakScore = q.score;
+                  sessionScoreSum += q.score;
+                  sessionQuestionsCount++;
+                });
+              }
 
               if (sessionQuestionsCount > 0) {
                 graphPoints.push({
@@ -239,13 +244,13 @@ export default function UserDashboard() {
             })}
           </div>
 
-          {/* FLOATING WORKSPACE LAUNCH TRIGGER STRIP */}
+          {/* FLOATING WORKSPACE LAUNCH TRIGGER STRIP (REDIRECTS TO /interview) */}
           <div className="mt-4 flex justify-end">
             <button
               onClick={() => router.push(`/interview?track=${encodeURIComponent(selectedTrack)}`)}
               className="cursor-pointer w-full sm:w-auto rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 px-8 py-3.5 text-xs font-black text-slate-950 shadow-xl shadow-cyan-500/20 transition hover:opacity-90 tracking-wide text-center uppercase"
             >
-              🚀 Launch Active Workspace ({selectedTrack})
+              🚀 Launch Active Workspace ({tracks.find(t => t.id === selectedTrack)?.title || selectedTrack})
             </button>
           </div>
         </div>
@@ -302,7 +307,7 @@ export default function UserDashboard() {
         )}
 
         {/* ==========================================================
-            🕒 RECENT EVALUATION TIMELINE MATRIX FEED (EDITABLE NODE)
+            🕒 RECENT EVALUATION TIMELINE MATRIX FEED
            ========================================================== */}
         <div className="rounded-2xl border border-white/5 bg-slate-900/20 p-6 backdrop-blur">
           <h2 className="text-sm font-mono uppercase tracking-widest text-slate-500 mb-4 font-bold">Historical Evaluation Timeline</h2>
@@ -312,7 +317,7 @@ export default function UserDashboard() {
           ) : interviews.length === 0 ? (
             <div className="py-12 text-center rounded-xl border border-dashed border-white/10 p-8">
               <p className="text-sm text-slate-400 mb-4">No logged records found in your tracking cluster dashboard.</p>
-              <button onClick={() => setSelectedTrack("Java & DSA")} className="text-xs font-bold text-cyan-400 hover:underline">Select a card above and start your first session ➔</button>
+              <button onClick={() => setSelectedTrack("java-dsa")} className="text-xs font-bold text-cyan-400 hover:underline">Select a card above and start your first session ➔</button>
             </div>
           ) : (
             <div className="divide-y divide-white/5 max-h-[40vh] overflow-y-auto pr-2">
@@ -334,12 +339,11 @@ export default function UserDashboard() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3 self-end sm:self-center">
-                    <span className="text-xs font-mono text-slate-500">{session.questions.length} question(s) evaluated</span>
+                    <span className="text-xs font-mono text-slate-500">{session.questions ? session.questions.length : 0} question(s) evaluated</span>
 
-                    {/* 🔥 UPGRADED LIVE TRIGGER INTERACTIVE BUTTON */}
                     <button
                       onClick={() => {
-                        console.log("CLICKED SESSION DATA:", session); // ◄── Yeh console me data check karega
+                        console.log("CLICKED SESSION DATA:", session);
                         setSelectedAuditSession(session);
                         setIsAuditModalOpen(true);
                       }}
@@ -363,7 +367,6 @@ export default function UserDashboard() {
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-cyan-500/20 max-w-4xl w-full rounded-2xl shadow-2xl p-6 max-h-[85vh] overflow-hidden flex flex-col">
             
-            {/* Modal Header Row */}
             <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-4 shrink-0">
               <div>
                 <span className="text-[10px] font-mono uppercase tracking-widest text-cyan-400 font-bold">Historical Audit Node</span>
@@ -383,13 +386,11 @@ export default function UserDashboard() {
               </button>
             </div>
 
-            {/* 🔄 SAFE-GUARDED MODAL INNER TIMELINE CONTENT LOOP */}
             <div className="flex-1 overflow-y-auto space-y-6 pr-2">
               {selectedAuditSession.questions && selectedAuditSession.questions.length > 0 ? (
                 selectedAuditSession.questions.map((q, idx) => (
                   <div key={idx} className="border border-white/5 bg-slate-950/40 rounded-xl p-4 space-y-4">
                     
-                    {/* Evaluated Objective Block */}
                     <div>
                       <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block mb-1">Evaluated Objective</span>
                       <p className="text-sm text-slate-300 bg-slate-950 p-3 rounded-lg border border-white/5 font-mono">
@@ -397,7 +398,6 @@ export default function UserDashboard() {
                       </p>
                     </div>
 
-                    {/* AI Response Block */}
                     <div>
                       <span className="text-[10px] font-mono text-cyan-400/70 uppercase tracking-wider block mb-2">AI Diagnostic Assessment & Feedback</span>
                       <div className="border border-cyan-500/10 bg-cyan-500/5 rounded-xl px-4 py-3 text-sm leading-relaxed whitespace-pre-line text-slate-200">
@@ -405,7 +405,6 @@ export default function UserDashboard() {
                       </div>
                     </div>
 
-                    {/* Performance Metric Badge */}
                     <div className="flex items-center justify-between bg-slate-900 p-3 rounded-lg border border-white/5">
                       <span className="text-xs font-mono text-slate-400">Target Readiness Score Assigned:</span>
                       <span className="rounded-md bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 text-xs font-black font-mono text-amber-400">
@@ -416,7 +415,6 @@ export default function UserDashboard() {
                   </div>
                 ))
               ) : (
-                /* 🚫 FALLBACK VIEW: AGAR DATABASE SE ARRAY EMPTY MILTA HAI */
                 <div className="text-center py-12 font-mono text-xs text-slate-500 border border-dashed border-white/5 rounded-2xl bg-slate-950/20">
                   🚫 No diagnostic question logs found inside this session node. 
                   <br />

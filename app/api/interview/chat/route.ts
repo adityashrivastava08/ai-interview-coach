@@ -1,77 +1,87 @@
-import { NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
-import { connectToDatabase } from "../../../../lib/db";
-import { Interview } from "../../../../models/Interview";
+import { NextResponse } from "next/server";
 
-const apiKey = process.env.GEMINI_API_KEY;
+// Initialize the Gemini API client
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+// System prompts mapped to interview tracks
+const TRACK_PERSONAS: Record<string, string> = {
+  "java-dsa": `
+    You are a Senior Principal Engineer and a notoriously strict DSA interviewer. 
+    Your objective is to evaluate the candidate's deep understanding of Java core, memory management, and algorithmic complexity.
+    
+    CRITICAL RULES:
+    1. Do NOT write full solutions or code for the candidate.
+    2. Focus heavily on Big O time/space complexity, edge cases, data structure choices, and Java internals (e.g., JVM memory, Garbage Collection, Collections framework).
+    3. If their logic is flawed, ask probing questions to make them realize their mistake. Do not spoon-feed the fix.
+    4. Keep your responses concise, professional, and slightly intimidating—like a real high-stakes technical round.
+    5. Ask exactly ONE question at a time. Wait for their response before moving forward.
+  `,
+  "mern": `
+    You are a Lead Full-Stack Architect specialized in the MERN stack (MongoDB, Express, React, Node.js).
+    Your objective is to evaluate the candidate's architecture choices, state management, asynchronous handling, performance optimization, and database indexing.
+    
+    CRITICAL RULES:
+    1. Do NOT provide boilerplate or working code blocks. Let the candidate architect the solution.
+    2. Deep dive into React rendering behaviors, custom hooks, Node.js event loop blockages, MongoDB aggregation pipelines, and secure authentication flow.
+    3. Critically analyze their architectural decisions (e.g., SSR vs. CSR, choosing SQL vs. NoSQL for specific use cases).
+    4. Be professional, direct, and demanding. Call out sub-optimal practices immediately.
+    5. Ask exactly ONE question at a time. Wait for their response before moving forward.
+  `,
+  "android": `
+    You are a Principal Android Engineer specializing in modern native Android development.
+    Your objective is to evaluate the candidate's mastery of Kotlin, Jetpack Compose, Coroutines/Flows, architecture patterns (MVVM/MVI), and memory efficiency.
+    
+    CRITICAL RULES:
+    1. Do NOT provide code snippets or UI layouts. 
+    2. Probe deeply into multi-threading pitfalls, memory leaks (e.g., lifecycle-aware components), Jetpack Compose recomposition optimization, and dependency injection (Hilt/Dagger).
+    3. Question their state-handling strategies and how they manage configuration changes cleanly.
+    4. Maintain a rigorous, senior-level tone. Push them to explain *why* they would choose one implementation over another.
+    5. Ask exactly ONE question at a time. Wait for their response before moving forward.
+  `
+};
 
 export async function POST(req: Request) {
   try {
-    if (!apiKey) {
-      return NextResponse.json({ error: "Server configuration missing API key." }, { status: 500 });
+    const { messages, track } = await req.json();
+
+    if (!messages || !Array.isArray(messages)) {
+      return NextResponse.json({ error: "Invalid messages array provided" }, { status: 400 });
     }
 
-    // We now accept the complete visual chat history array along with user fields
-    const { problemPrompt, userCode, chatHistory, interviewId } = await req.json();
-
-    if (!problemPrompt || !interviewId || !chatHistory) {
-      return NextResponse.json({ error: "Missing required tracking parameters." }, { status: 400 });
-    }
-
-    const ai = new GoogleGenAI({ apiKey });
-
-    const systemInstruction = `
-      You are an elite Technical Interviewer conducting a live "Java & DSA" interview session.
-      The active problem statement is: "${problemPrompt}".
-      
-      Analyze the candidate's responses meticulously. 
-      - If they submit code, provide a rigorous analysis of correctness, boundary bugs, and Big O complexity.
-      - If they are answering a follow-up question you asked, evaluate their explanation or optimization logic.
-      
-      Always stay in character. Keep responses concise, professional, and ending with a clear direction or next question to keep the interview moving forward. Do not use markdown headers like # or ##.
+    // Fallback to a generalized strict tech interviewer if track is missing/unmatched
+    const baseSystemInstruction = TRACK_PERSONAS[track] || `
+      You are a strict, senior technical interviewer. Evaluate the candidate's engineering fundamentals ruthlessly.
+      Do not write code for them. Point out flaws. Ask exactly ONE question at a time.
     `;
 
-    // Map the local UI chat history format directly into Gemini's native context structure
-    const formattedContents = chatHistory.map((msg: any) => ({
+    // Format historical messages for Gemini API
+    // Ensure the structure matches Gemini's Content type array
+    const contents = messages.map((msg: any) => ({
       role: msg.role === "user" ? "user" : "model",
-      parts: [{ text: msg.text }]
+      parts: [{ text: msg.content || msg.text }]
     }));
 
-    // Append the most recent submission context into the payload stream
-    if (userCode && userCode.trim() !== "") {
-      formattedContents.push({
-        role: "user",
-        parts: [{ text: `Candidate submitted updated code:\n${userCode}` }]
-      });
-    }
-
-    // Execute the live conversational generation request
+    // Call Gemini with the strict system instruction injected
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
-      contents: formattedContents,
-      config: { systemInstruction, temperature: 0.7 }
-    });
-
-    const aiFeedback = response.text || "The evaluator failed to render conversation text.";
-
-    await connectToDatabase();
-
-    // Log the interaction directly into your MongoDB Atlas historical collection record
-    await Interview.findByIdAndUpdate(interviewId, {
-      $push: {
-        questions: {
-          questionText: problemPrompt,
-          userAnswer: userCode || "Text response chat query",
-          score: 7,
-          feedback: aiFeedback
-        }
+      contents: contents,
+      config: {
+        systemInstruction: baseSystemInstruction,
+        temperature: 0.6, // Kept slightly lower for deterministic, sharp, and focused interviewing
+        maxOutputTokens: 600
       }
     });
 
-    return NextResponse.json({ text: aiFeedback });
+    const aiResponseText = response.text || "I apologize, let's reset that. Can you repeat your last answer?";
+
+    return NextResponse.json({ text: aiResponseText });
 
   } catch (error: any) {
-    console.error("🚨 Gemini Chat History Pipeline Failure:", error);
-    return NextResponse.json({ error: "Internal evaluation pipeline error." }, { status: 500 });
+    console.error("Error in AI Chat Route:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error", details: error.message },
+      { status: 500 }
+    );
   }
 }
