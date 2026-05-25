@@ -20,7 +20,8 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const email = credentials?.email;
+        // Uniform parsing: Frontend ki tarah backend par bhi trim aur lowercase lock karo
+        const email = credentials?.email?.trim().toLowerCase();
         const password = credentials?.password;
 
         if (!email || !password) {
@@ -29,6 +30,7 @@ export const authOptions: NextAuthOptions = {
 
         await connectToDatabase();
 
+        // Safe database lookup with formatted email query string
         const user = await User.findOne({ email });
         if (!user) {
           return null;
@@ -48,18 +50,27 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    // =====================================================================
+    // ↩️ NEW REDIRECT CALLBACK: CONTROLS ROUTING ON LOGOUT / SESSION EXPIRY
+    // =====================================================================
+    async redirect({ url, baseUrl }) {
+      // Agar explicit callback url pass hua hai (jaise signout me "/"), toh uspar bhejo
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
+    },
+
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
       }
-
       return token;
     },
+    
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
       }
-
       return session;
     },
   },
