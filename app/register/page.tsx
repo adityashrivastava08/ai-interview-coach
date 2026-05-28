@@ -55,8 +55,8 @@ export default function RegisterPage() {
         <div className="h-2 bg-[linear-gradient(90deg,#0f766e,#06b6d4,#fb7185,#f59e0b)]" />
         <div className="p-6 sm:p-8">
           <div className="mb-7 text-center">
-            <p className="mb-3 inline-flex rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-amber-700">
-              IntervAI
+            <p className="mb-3 inline-flex rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
+              PrepPath
             </p>
             <h2 className="mb-2 text-3xl font-black tracking-tight text-slate-950">Create your account</h2>
             <p className="text-sm text-slate-500">Start practicing your technical interviews</p>

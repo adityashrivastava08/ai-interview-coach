@@ -35,8 +35,8 @@ export default function LandingPage() {
             <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-cyan-400 to-blue-600 flex items-center justify-center font-black text-slate-950 shadow-lg shadow-cyan-500/20">
               ⚡
             </div>
-            <span className="text-lg font-black tracking-wider bg-gradient-to-r from-white via-slate-200 to-cyan-400 bg-clip-text text-transparent">
-              IntervAI
+            <span className="text-lg font-black tracking-wider bg-gradient-to-r from-white via-slate-200 to-blue-400 bg-clip-text text-transparent">
+              PrepPath
             </span>
           </div>
 
@@ -62,35 +62,35 @@ export default function LandingPage() {
       <main className="mx-auto max-w-7xl px-4 pt-20 pb-16 sm:px-6 lg:px-8 text-center relative z-10">
         
         {/* Decorative Badge Notification */}
-        <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-[10px] font-mono uppercase tracking-widest text-cyan-400 mb-6">
-          <span>✨ Next-Gen Multi-Track AI Simulator Live</span>
+        <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-[10px] font-mono uppercase tracking-widest text-blue-400 mb-6">
+          <span>✨ Next-Gen AI Placement Prep Platform Live</span>
         </div>
 
         {/* Main Pitch Catchphrase */}
         <h1 className="text-4xl font-black tracking-tight text-white sm:text-6xl max-w-4xl mx-auto leading-[1.15]">
-          Crack Technical Mock Interviews With{" "}
-          <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-500 bg-clip-text text-transparent">
-            Real-Time AI Context Evaluation
+          Ace Your Placements With{" "}
+          <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-violet-500 bg-clip-text text-transparent">
+            AI Mock Interviews & Resume ATS Audit
           </span>
         </h1>
 
         <p className="mt-6 text-sm sm:text-base text-slate-400 max-w-2xl mx-auto leading-relaxed">
-          An interactive, data-persistent technical interview playground. Simulate context-aware loops for Java DSA, MERN Full-Stack, and Android Engineering with diagnostic score reporting.
+          PrepPath helps you build placement readiness. Evaluate resume ATS scoring, practice curated coding questions with real-time feedback, and take high-stakes simulated AI mock interviews.
         </p>
 
         {/* Primary CTA Block */}
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
           <button 
             onClick={() => router.push("/register")} 
-            className="cursor-pointer w-full sm:w-auto rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 px-8 py-4 text-xs font-black text-slate-950 shadow-2xl shadow-cyan-500/20 transition hover:scale-[1.01] uppercase tracking-wider"
+            className="cursor-pointer w-full sm:w-auto rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 px-8 py-4 text-xs font-black text-white shadow-2xl shadow-blue-500/20 transition hover:scale-[1.01] uppercase tracking-wider"
           >
-            Start Mock Session Now ➔
+            Start Preparing Now ➔
           </button>
           <button 
             onClick={() => router.push("/login")} 
             className="cursor-pointer w-full sm:w-auto rounded-xl border border-white/10 bg-slate-900/50 hover:bg-slate-900 px-8 py-4 text-xs font-bold text-slate-300 transition"
           >
-            View Dashboard Deck
+            Enter Dashboard
           </button>
         </div>
 
@@ -133,7 +133,7 @@ export default function LandingPage() {
 
       {/* Small Footer Block */}
       <footer className="border-t border-white/5 py-8 text-center text-xs font-mono text-slate-600 relative z-10">
-        © 2026 IntervAI Control Node Engine. All rights reserved.
+        © 2026 PrepPath Placement Prep Platform. All rights reserved.
       </footer>
     </div>
   );

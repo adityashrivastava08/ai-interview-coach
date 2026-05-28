@@ -49,8 +49,8 @@ export default function LoginPage() {
         <div className="h-2 bg-[linear-gradient(90deg,#06b6d4,#3b82f6,#6366f1,#f59e0b)]" />
         <div className="p-6 sm:p-8">
           <div className="mb-7 text-center">
-            <p className="mb-3 inline-flex rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-cyan-400 animate-pulse">
-              IntervAI
+            <p className="mb-3 inline-flex rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-blue-400 animate-pulse">
+              PrepPath
             </p>
             <h2 className="mb-2 text-3xl font-black tracking-tight text-white">Welcome back</h2>
             <p className="text-sm text-slate-400">Sign in to continue practicing</p>
