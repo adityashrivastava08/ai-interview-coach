@@ -55,6 +55,11 @@ function InterviewContent() {
   const [cameraActive, setCameraActive] = useState(true);
   const [voiceMuted, setVoiceMuted] = useState(false);
 
+  // Voice Input Speech Recognition States
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+  const startInputRef = useRef<string>("");
+
   // Active question counter
   const [questionIndex, setQuestionIndex] = useState(1);
 
@@ -79,6 +84,65 @@ function InterviewContent() {
     }, 1000);
     return () => clearInterval(timerInterval);
   }, [timeLeft]);
+
+  // Web Speech API Voice Recognition Setup
+  useEffect(() => {
+    // Browser validation check for Web Speech API
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    
+    if (SpeechRecognition) {
+      const rec = new SpeechRecognition();
+      rec.continuous = true;       // Jab tak user khud na roke, tab tak sunta rahega
+      rec.interimResults = true;   // Real-time transcript feedback ke liye true kiya
+      rec.lang = "en-US";          // Technical round ke liye English language set ki hai
+
+      // Jab AI candidate ki voice ko text mein convert kar lega
+      rec.onresult = (event: any) => {
+        let sessionTranscript = "";
+        for (let i = 0; i < event.results.length; ++i) {
+          sessionTranscript += event.results[i][0].transcript;
+        }
+        
+        // Purane input string ke aage naya bola hua text real-time me jod dega
+        setInput(startInputRef.current + (startInputRef.current ? " " : "") + sessionTranscript);
+      };
+
+      rec.onerror = (event: any) => {
+        console.error("Speech Recognition Error:", event.error);
+        setIsListening(false);
+      };
+
+      rec.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = rec;
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
+  // Mic Toggle Handler Function
+  const toggleListening = () => {
+    if (!recognitionRef.current) {
+      alert("🚨 Aapka browser Voice Input (Speech-to-Text) support nahi karta. Please Chrome ya Edge use karein.");
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      // Store the current input value before starting speech recognition
+      startInputRef.current = input;
+      recognitionRef.current.start();
+      setIsListening(true);
+    }
+  };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -169,6 +233,12 @@ function InterviewContent() {
       window.speechSynthesis.cancel();
     }
 
+    // Stop speech recognition when user submits answer
+    if (isListening && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    }
+
     const userMessage: Message = { role: "user", content: input.trim() };
     const updatedMessages = [...messages, userMessage];
     
@@ -216,6 +286,12 @@ function InterviewContent() {
     
     if (typeof window !== "undefined" && window.speechSynthesis) {
       window.speechSynthesis.cancel();
+    }
+
+    // Stop speech recognition when user skips question
+    if (isListening && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
     }
 
     setInput("");
@@ -275,11 +351,13 @@ function InterviewContent() {
         window.location.replace("/dashboard");
       } else {
         const errorData = await res.json();
-        console.error("Server Save Error:", errorData.error);
+        console.error("Server Save Error:", errorData.error, errorData.details);
+        alert(`🚨 Evaluation Error: ${errorData.error}\n\nDetails: ${errorData.details || "Unknown backend issue"}`);
         setIsSaving(false);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Save Network Error:", error);
+      alert(`🚨 Network Error: ${error.message || "Failed to communicate with the server."}`);
       setIsSaving(false);
     }
   };
@@ -478,14 +556,44 @@ function InterviewContent() {
 
           {/* Response formulation text editor */}
           <form onSubmit={handleSendAnswer} className="border-t border-slate-100 dark:border-slate-800 pt-4">
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              disabled={isLoading || isSaving}
-              rows={4}
-              placeholder={isLoading ? "Please wait for the interviewer..." : "Type your technical explanation or logic reply here..."}
-              className="w-full text-xs p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f172a] focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none"
-            />
+            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 relative group mb-3">
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  Your Response
+                </label>
+                
+                {/* 🔥 LIVE MIC TOGGLE CONTROLLER */}
+                <button
+                  type="button"
+                  onClick={toggleListening}
+                  className={`cursor-pointer flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold font-mono transition-all border ${
+                    isListening
+                      ? "bg-red-500/10 border-red-500/30 text-red-650 dark:text-red-400 animate-pulse"
+                      : "bg-slate-100 dark:bg-white/5 border-slate-300 dark:border-white/5 text-slate-700 dark:text-slate-300 hover:border-cyan-500/30 hover:text-cyan-600 dark:hover:text-cyan-400"
+                  }`}
+                >
+                  {isListening ? (
+                    <>
+                      <span className="h-2 w-2 rounded-full bg-red-500 animate-ping"></span>
+                      <span>Listening... (Click to Stop)</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>🎙️ Speak Answer</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Input Textarea Field */}
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                disabled={isLoading || isSaving}
+                placeholder={isListening ? "Bolna shuru karein, AI live type kar raha hai..." : "Type your response here or click 'Speak Answer' to use voice..."}
+                className="w-full h-36 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all text-slate-800 dark:text-slate-100 placeholder-slate-450 dark:placeholder-slate-650 resize-none disabled:opacity-50"
+              />
+            </div>
             
             <div className="mt-3 flex items-center justify-between gap-4">
               <button

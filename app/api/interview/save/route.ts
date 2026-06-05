@@ -24,7 +24,7 @@ export async function POST(req: Request) {
 
     // 3. Connect to Database and find User
     await connectToDatabase();
-    const userDoc = await User.findOne({ email: session.user.email });
+    const userDoc = await User.findOne({ email: session.user.email.trim().toLowerCase() });
     if (!userDoc) {
       return NextResponse.json({ error: "User profile mismatch" }, { status: 404 });
     }
@@ -73,7 +73,23 @@ export async function POST(req: Request) {
     });
 
     const rawJsonText = response.text?.trim() || "{}";
-    const result = JSON.parse(rawJsonText);
+    let result: any = {};
+    try {
+      result = JSON.parse(rawJsonText);
+    } catch (parseErr: any) {
+      console.warn("Standard JSON parse failed, trying regex extraction...", parseErr);
+      const jsonMatch = rawJsonText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          result = JSON.parse(jsonMatch[0]);
+        } catch (matchErr: any) {
+          console.error("JSON extraction parse failed:", matchErr);
+          throw new Error("Invalid evaluation format returned by AI: " + matchErr.message);
+        }
+      } else {
+        throw new Error("Failed to parse evaluation response: " + parseErr.message);
+      }
+    }
 
     // 5. Create the Interview Document in Database
     const newInterview = await Interview.create({
