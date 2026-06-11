@@ -50,32 +50,32 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4 sm:p-6">
-      <div className="w-full max-w-md overflow-hidden rounded-2xl border border-white/80 bg-white/85 shadow-[0_28px_90px_-38px_rgba(15,23,42,0.55)] backdrop-blur">
+    <div className="flex min-h-screen items-center justify-center p-4 sm:p-6 bg-slate-950">
+      <div className="w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-slate-900/80 shadow-[0_28px_90px_-38px_rgba(0,0,0,0.8)] backdrop-blur">
         <div className="h-2 bg-[linear-gradient(90deg,#0f766e,#06b6d4,#fb7185,#f59e0b)]" />
         <div className="p-6 sm:p-8">
           <div className="mb-7 text-center">
-            <p className="mb-3 inline-flex rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
+            <p className="mb-3 inline-flex rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-teal-400 animate-pulse">
               PrepPath
             </p>
-            <h2 className="mb-2 text-3xl font-black tracking-tight text-slate-950">Create your account</h2>
-            <p className="text-sm text-slate-500">Start practicing your technical interviews</p>
+            <h2 className="mb-2 text-3xl font-black tracking-tight text-white">Create your account</h2>
+            <p className="text-sm text-slate-400">Start practicing your technical interviews</p>
           </div>
 
         {/* Dynamic Error Container Box */}
         {errorMessage && (
-          <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700 whitespace-pre-wrap break-words">
+          <div className="mb-4 rounded-lg border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-400 whitespace-pre-wrap break-words">
             {errorMessage}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Full Name</label>
+            <label className="mb-1.5 block text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Full Name</label>
             <input
               type="text"
               required
-              className="w-full rounded-lg border border-cyan-100 bg-cyan-50/50 px-3 py-2.5 text-sm text-slate-950 shadow-inner shadow-cyan-100/40 outline-none transition focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100"
+              className="w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2.5 text-sm text-white shadow-inner outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
               placeholder="Aditya Ranjan"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -83,11 +83,11 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Email Address</label>
+            <label className="mb-1.5 block text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Email Address</label>
             <input
               type="email"
               required
-              className="w-full rounded-lg border border-cyan-100 bg-cyan-50/50 px-3 py-2.5 text-sm text-slate-950 shadow-inner shadow-cyan-100/40 outline-none transition focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100"
+              className="w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2.5 text-sm text-white shadow-inner outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
               placeholder="you@example.com"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -95,11 +95,11 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Password</label>
+            <label className="mb-1.5 block text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Password</label>
             <input
               type="password"
               required
-              className="w-full rounded-lg border border-cyan-100 bg-cyan-50/50 px-3 py-2.5 text-sm text-slate-950 shadow-inner shadow-cyan-100/40 outline-none transition focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100"
+              className="w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2.5 text-sm text-white shadow-inner outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
               placeholder="********"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -109,7 +109,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-2 w-full cursor-pointer rounded-lg bg-teal-700 py-2.5 text-sm font-bold text-white shadow-lg shadow-teal-900/20 transition hover:bg-teal-800 disabled:opacity-50"
+            className="mt-2 w-full cursor-pointer rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 py-2.5 text-sm font-bold text-slate-950 shadow-lg shadow-teal-500/10 transition hover:opacity-90 disabled:opacity-50 font-black uppercase tracking-wider"
           >
             {loading ? "Creating Account..." : "Sign Up"}
           </button>
