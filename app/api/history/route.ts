@@ -6,7 +6,7 @@ import { User } from "@/models/User";
 import { Resume } from "@/models/Resume";
 import { DSAPractice } from "@/models/DSAPractice";
 import { AptitudeAttempt } from "@/models/AptitudeAttempt";
-import { authOptions } from "../auth/[...nextauth]/route"; // Double check your authOptions import path if needed
+import { authOptions } from "@/lib/auth"; // Double check your authOptions import path if needed
 
 export async function GET(req: Request) {
   try {
