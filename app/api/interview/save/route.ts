@@ -6,10 +6,12 @@ import { connectToDatabase } from "@/lib/db";
 import { Interview } from "@/models/Interview";
 import { User } from "@/models/User";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-
 export async function POST(req: Request) {
   try {
+    if (!process.env.GEMINI_API_KEY) {
+      return NextResponse.json({ error: "Server configuration missing Gemini API key." }, { status: 500 });
+    }
+
     // 1. Authenticate user
     const session = await getServerSession(authOptions);
     if (!session || !session.user?.email) {
@@ -63,6 +65,7 @@ export async function POST(req: Request) {
       - Respond ONLY with the raw JSON object. Do not wrap the JSON output in markdown formatting.
     `;
 
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent(evaluationPrompt);
     const response = await result.response;

@@ -6,10 +6,12 @@ import { connectToDatabase } from "@/lib/db";
 import { DSAPractice } from "@/models/DSAPractice";
 import { User } from "@/models/User";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-
 export async function POST(req: Request) {
   try {
+    if (!process.env.GEMINI_API_KEY) {
+      return NextResponse.json({ error: "Server configuration missing Gemini API key." }, { status: 500 });
+    }
+
     // 1. Authenticate session
     const session = await getServerSession(authOptions);
     if (!session || !session.user?.email) {
@@ -47,6 +49,7 @@ export async function POST(req: Request) {
     `;
 
     // 4. Query Gemini
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent(evaluationPrompt);
     const response = await result.response;
@@ -57,7 +60,7 @@ export async function POST(req: Request) {
       // Clean up potential markdown formatting if Gemini ignored the instruction
       const cleanedJson = rawJsonText.replace(/```json|```/g, "").trim();
       resultJson = JSON.parse(cleanedJson);
-    } catch (e) {
+    } catch {
       console.error("Failed to parse AI JSON:", rawJsonText);
       resultJson = { status: "attempted", score: 5, feedback: "Error parsing AI feedback." };
     }

@@ -8,12 +8,11 @@ import { DSAPractice } from "@/models/DSAPractice";
 import { AptitudeAttempt } from "@/models/AptitudeAttempt";
 import { authOptions } from "@/lib/auth"; // Double check your authOptions import path if needed
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     // 1. Authenticate the active secure browser cookie session
-    const { searchParams } = new URL(req.url);
-    const rawEmail = searchParams.get("email");
-    const email = rawEmail?.trim().toLowerCase();
+    const session = await getServerSession(authOptions);
+    const email = session?.user?.email?.trim().toLowerCase();
 
     if (!email) {
       return NextResponse.json({ error: "Unauthorized access parameters." }, { status: 401 });

@@ -6,10 +6,12 @@ import { connectToDatabase } from "@/lib/db";
 import { Resume } from "@/models/Resume";
 import { User } from "@/models/User";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-
 export async function POST(req: Request) {
   try {
+    if (!process.env.GEMINI_API_KEY) {
+      return NextResponse.json({ error: "Server configuration missing Gemini API key." }, { status: 500 });
+    }
+
     // 1. Authenticate session
     const session = await getServerSession(authOptions);
     if (!session || !session.user?.email) {
@@ -48,6 +50,7 @@ export async function POST(req: Request) {
     `;
 
     // 5. Query Gemini with base64 PDF inline data
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent([
       {
@@ -65,7 +68,7 @@ export async function POST(req: Request) {
     try {
       const cleanedJson = rawJsonText.replace(/```json|```/g, "").trim();
       analysisResult = JSON.parse(cleanedJson);
-    } catch (e) {
+    } catch {
       console.error("Failed to parse Resume AI JSON:", rawJsonText);
       analysisResult = { atsScore: 0, feedback: "Error analyzing resume." };
     }

@@ -227,7 +227,7 @@ export default function UserDashboard() {
 
     try {
       setLoadingHistory(true);
-      const response = await fetch(`/api/history?email=${session.user.email}`);
+      const response = await fetch("/api/history");
       const data = await response.json();
 
       if (response.ok) {
