@@ -12,7 +12,8 @@ export async function GET() {
     }
 
     await connectToDatabase();
-    const user = await User.findOne({ email: session.user.email }).select("-password").lean();
+    const email = session.user.email.toLowerCase();
+    const user = await User.findOne({ email }).select("-password").lean();
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -35,8 +36,9 @@ export async function POST(req: Request) {
     const { name, avatarUrl, college, targetCompany, role } = await req.json();
 
     await connectToDatabase();
+    const email = session.user.email.toLowerCase();
     const updatedUser = await User.findOneAndUpdate(
-      { email: session.user.email },
+      { email },
       {
         $set: {
           name: name?.trim() || session.user.name,

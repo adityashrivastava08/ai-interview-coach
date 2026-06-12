@@ -6,7 +6,9 @@ import { User } from "@/models/User";
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password } = await req.json();
+    const body = await req.json();
+    const email = body.email?.trim().toLowerCase();
+    const { name, password } = body;
 
     if (!name || !email || !password) {
       return NextResponse.json(

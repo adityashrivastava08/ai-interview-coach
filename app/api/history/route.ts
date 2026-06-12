@@ -12,7 +12,8 @@ export async function GET(req: Request) {
   try {
     // 1. Authenticate the active secure browser cookie session
     const { searchParams } = new URL(req.url);
-    const email = searchParams.get("email");
+    const rawEmail = searchParams.get("email");
+    const email = rawEmail?.trim().toLowerCase();
 
     if (!email) {
       return NextResponse.json({ error: "Unauthorized access parameters." }, { status: 401 });

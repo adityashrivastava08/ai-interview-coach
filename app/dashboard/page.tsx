@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { UserAvatar, PRESET_AVATARS } from "@/components/Avatar";
@@ -19,8 +19,7 @@ import {
 import { 
   DSA_QUESTIONS, 
   APTITUDE_QUESTIONS, 
-  DSAPriorQuestion, 
-  AptitudeQuestion 
+  DSAPriorQuestion
 } from "@/lib/questions";
 
 // ==========================================
@@ -109,7 +108,6 @@ export default function UserDashboard() {
   const [dsaEvaluationResult, setDsaEvaluationResult] = useState<any>(null);
 
   // Aptitude Practice state
-  const [aptitudeAttempts, setAptitudeAttempts] = useState<any[]>([]);
   const [activeAptOptionInputs, setActiveAptOptionInputs] = useState<Record<string, number>>({});
   const [activeAptEvaluations, setActiveAptEvaluations] = useState<Record<string, any>>({});
   const [activeAptLoading, setActiveAptLoading] = useState<Record<string, boolean>>({});
@@ -136,7 +134,7 @@ export default function UserDashboard() {
   const [profileSuccessMessage, setProfileSuccessMessage] = useState("");
   const [profileErrorMessage, setProfileErrorMessage] = useState("");
 
-  const fetchUserProfile = async () => {
+  const fetchUserProfile = useCallback(async () => {
     if (status !== "authenticated" || !session?.user?.email) return;
     try {
       const response = await fetch("/api/user/profile");
@@ -153,7 +151,7 @@ export default function UserDashboard() {
     } catch (err) {
       console.error("Error fetching user profile:", err);
     }
-  };
+  }, [session?.user?.email, session?.user?.name, status]);
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -181,7 +179,7 @@ export default function UserDashboard() {
       } else {
         setProfileErrorMessage(data.error || "Failed to update profile details.");
       }
-    } catch (err) {
+    } catch {
       setProfileErrorMessage("An error occurred while updating profile.");
     } finally {
       setSavingProfile(false);
@@ -224,7 +222,7 @@ export default function UserDashboard() {
   // ==========================================
   // 📊 COMPREHENSIVE DATA FETCHER EFFECT
   // ==========================================
-  const fetchPerformanceHistory = async () => {
+  const fetchPerformanceHistory = useCallback(async () => {
     if (status !== "authenticated" || !session?.user?.email) return;
 
     try {
@@ -257,7 +255,6 @@ export default function UserDashboard() {
 
         // Set Aptitude Attempts
         const aptAttempts = data.aptitudeAttempts || [];
-        setAptitudeAttempts(aptAttempts);
 
         // Populate evaluations state for already solved aptitude questions
         const initialEvaluations: Record<string, any> = {};
@@ -337,12 +334,12 @@ export default function UserDashboard() {
     } finally {
       setLoadingHistory(false);
     }
-  };
+  }, [session?.user?.email, status]);
 
   useEffect(() => {
     fetchPerformanceHistory();
     fetchUserProfile();
-  }, [status, session]);
+  }, [fetchPerformanceHistory, fetchUserProfile]);
 
   // ==========================================
   // 📁 RESUME FILE UPLOAD HANDLER
@@ -410,7 +407,7 @@ export default function UserDashboard() {
         } else {
           setResumeError(data.error || "Failed to process resume analysis.");
         }
-      } catch (err) {
+      } catch {
         setResumeError("An error occurred while uploading your resume file.");
       } finally {
         setTimeout(() => setResumeProcessing(false), 500);
@@ -456,7 +453,7 @@ export default function UserDashboard() {
           feedback: data.error || "Execution timeout or evaluation failure."
         });
       }
-    } catch (err) {
+    } catch {
       setDsaEvaluationResult({
         status: "attempted",
         score: 0,
@@ -991,8 +988,10 @@ export default function UserDashboard() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Target Corporate standard (Optional)</label>
+                <label htmlFor="setup-company" className="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Target Corporate standard (Optional)</label>
                 <select
+                  id="setup-company"
+                  aria-label="Target Corporate standard (Optional)"
                   value={setupCompany}
                   onChange={(e) => setSetupCompany(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-[#334155] bg-white dark:bg-[#1e293b] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
@@ -1041,6 +1040,7 @@ export default function UserDashboard() {
                     id="resume-input-file"
                     className="hidden"
                     accept=".pdf,.txt"
+                    aria-label="Upload resume file"
                     onChange={handleFileUpload}
                   />
                   <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-blue-50 dark:bg-[#1e293b] border border-blue-100 dark:border-slate-800">
@@ -1184,7 +1184,7 @@ export default function UserDashboard() {
                 </div>
 
                 <div className="card p-6 bg-gradient-to-r from-blue-500/5 to-indigo-500/5 border-blue-500/15">
-                  <h3 className="font-extrabold text-sm text-blue-600 dark:text-blue-400 mb-2">Technical Recruiter's Diagnostic Summary</h3>
+                  <h3 className="font-extrabold text-sm text-blue-600 dark:text-blue-400 mb-2">Technical Recruiter&apos;s Diagnostic Summary</h3>
                   <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">{resumeAnalysis.feedback}</p>
                 </div>
 
@@ -1304,8 +1304,10 @@ export default function UserDashboard() {
                         <h4 className="font-extrabold text-xs text-slate-400 dark:text-slate-500 uppercase">Write Code Solution</h4>
                         
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-bold text-slate-400">Language:</span>
+                          <label htmlFor="dsa-language" className="text-[10px] font-bold text-slate-400">Language:</label>
                           <select
+                            id="dsa-language"
+                            title="Select programming language"
                             value={dsaLanguage}
                             onChange={(e) => setDsaLanguage(e.target.value)}
                             className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-1 rounded text-[11px] focus:outline-none"
@@ -1317,7 +1319,12 @@ export default function UserDashboard() {
                         </div>
                       </div>
 
+                      <label htmlFor="dsa-code" className="sr-only">Code input</label>
                       <textarea
+                        id="dsa-code"
+                        title="Enter your solution code"
+                        placeholder="Write your code solution here..."
+                        aria-label="Code input"
                         value={dsaCodeInput}
                         onChange={(e) => setDsaCodeInput(e.target.value)}
                         disabled={dsaEvaluating}
@@ -1328,6 +1335,7 @@ export default function UserDashboard() {
                       <div className="flex justify-end">
                         <button
                           onClick={handleDsaSubmit}
+                          title="Submit solution"
                           disabled={dsaEvaluating || !dsaCodeInput.trim()}
                           className="btn-primary text-xs flex items-center gap-1.5 disabled:opacity-40 cursor-pointer"
                         >
@@ -1774,7 +1782,7 @@ export default function UserDashboard() {
                           <span>{APTITUDE_QUESTIONS.length ? Math.round((stats.solvedAptitudeCount / APTITUDE_QUESTIONS.length) * 100) : 0}% / 80% Target</span>
                         </div>
                         <div className="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-900 overflow-hidden">
-                          <div
+                          <div 
                             className="h-full bg-amber-500 transition-all duration-500"
                             style={{ width: `${Math.min(100, APTITUDE_QUESTIONS.length ? (stats.solvedAptitudeCount / APTITUDE_QUESTIONS.length) * 100 : 0)}%` }}
                           />

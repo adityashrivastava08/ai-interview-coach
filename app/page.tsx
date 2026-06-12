@@ -163,7 +163,7 @@ export default function LandingPage() {
               <div className="text-2xl mb-3">💬</div>
               <h3 className="text-sm font-black text-white mb-1">Multi-Turn Active Dialogue</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Don't just submit code. Respond to technical follow-up challenge queries dynamically with full conversational context memory retention.
+                Don&apos;t just submit code. Respond to technical follow-up challenge queries dynamically with full conversational context memory retention.
               </p>
             </div>
             <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-6 shadow-sm">
