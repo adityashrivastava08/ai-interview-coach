@@ -19,8 +19,8 @@ export async function POST(req: Request) {
     }
 
     // 2. Parse request payload
-    const { track, messages } = await req.json();
-    if (!track || !messages || messages.length === 0) {
+    const { interviewId, track, messages } = await req.json();
+    if (!messages || messages.length === 0) {
       return NextResponse.json({ error: "Missing interview session data" }, { status: 400 });
     }
 
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
       You are an expert Senior Technical Recruiter and Bar Raiser.
       Evaluate the technical mock interview dialogue transcript between the Interviewer and the Candidate.
 
-      Track Domain: ${track}
+      Track Domain: ${track || "Technical Interview"}
       Full Transcript:
       ${transcriptText}
 
@@ -90,10 +90,10 @@ export async function POST(req: Request) {
       }
     }
 
-    // 5. Create the Interview Document in Database
-    const newInterview = await Interview.create({
+    // 5. Update or Create the Interview Document in Database
+    const updateData = {
       userId: userDoc._id,
-      topic: track.replace("-", " ").toUpperCase(),
+      topic: (track || "Technical Interview").replace("-", " ").toUpperCase(),
       score: evaluationResult.overallScore || 6,
       feedback: evaluationResult.overallFeedback || "Evaluation completed successfully.",
       questions: (evaluationResult.questions || []).map((q: any) => ({
@@ -103,12 +103,19 @@ export async function POST(req: Request) {
         feedback: q.feedback || "Attempt recorded."
       })),
       createdAt: new Date()
-    });
+    };
+
+    let interviewDoc;
+    if (interviewId) {
+      interviewDoc = await Interview.findByIdAndUpdate(interviewId, updateData, { new: true });
+    } else {
+      interviewDoc = await Interview.create(updateData);
+    }
 
     return NextResponse.json({
       success: true,
       message: "Interview saved and analyzed successfully!",
-      interview: newInterview
+      interview: interviewDoc
     });
 
   } catch (error: any) {

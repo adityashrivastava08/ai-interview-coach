@@ -1,20 +1,25 @@
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "../../../../lib/db"; // ◄── CHANGED TO connectToDatabase
-import { Interview } from "../../../../models/Interview";
-import { User } from "../../../../models/User";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+import { connectToDatabase } from "@/lib/db";
+import { Interview } from "@/models/Interview";
+import { User } from "@/models/User";
 
 export async function POST(req: Request) {
   try {
-    const session = await req.json();
-    const { email, topic } = session;
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user?.email) {
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+    }
 
-    if (!email || !topic) {
+    const { topic } = await req.json();
+    if (!topic) {
       return NextResponse.json({ error: "Missing identity tracking values." }, { status: 400 });
     }
 
-    // ◄── CALL THE CORRECT FUNCTION NAME HERE
     await connectToDatabase(); 
 
+    const email = session.user.email.trim().toLowerCase();
     const userDoc = await User.findOne({ email });
     if (!userDoc) {
       return NextResponse.json({ error: "Authenticated profile mismatch." }, { status: 404 });

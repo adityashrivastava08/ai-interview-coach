@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { UserAvatar } from "@/components/Avatar";
 
@@ -13,7 +13,6 @@ interface Message {
 function InterviewContent() {
   const { data: session } = useSession();
   const searchParams = useSearchParams();
-  const router = useRouter();
 
   const [profile, setProfile] = useState({
     name: "",
@@ -199,13 +198,18 @@ function InterviewContent() {
         });
         const data = await res.json();
         if (data.text) {
-          setMessages([{ role: "model", content: data.text }]);
+          // GEMINI FIX: History must start with 'user'
+          setMessages([
+            { role: "user", content: welcomeMessage },
+            { role: "model", content: data.text }
+          ]);
           speakText(data.text);
         }
       } catch (err) {
         console.error("Failed to fetch initial question:", err);
         const welcomeFallback = "👋 Welcome! Let's begin the interview. Can you introduce yourself and tell me about a technical project you completed recently?";
         setMessages([
+          { role: "user", content: "Hello" },
           { role: "model", content: welcomeFallback }
         ]);
         speakText(welcomeFallback);
@@ -344,7 +348,7 @@ function InterviewContent() {
       const res = await fetch("/api/interview/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ track, messages }),
+        body: JSON.stringify({ interviewId, track, messages }),
       });
 
       if (res.ok) {
