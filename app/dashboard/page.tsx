@@ -618,6 +618,9 @@ export default function UserDashboard() {
 
             <div className="relative">
               <button
+                type="button"
+                aria-label="Open account menu"
+                aria-haspopup="menu"
                 onClick={() => setAvatarDropdownActive(!avatarDropdownActive)}
                 className="flex items-center gap-1.5 p-1 rounded-xl border border-slate-200/50 dark:border-[#334155]/30 bg-white/50 dark:bg-[#1e293b]/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
               >
