@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -6,7 +6,7 @@ import { connectToDatabase } from "@/lib/db";
 import { DSAPractice } from "@/models/DSAPractice";
 import { User } from "@/models/User";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 export async function POST(req: Request) {
   try {
@@ -26,38 +26,41 @@ export async function POST(req: Request) {
     const evaluationPrompt = `
       You are an expert technical interviewer and algorithms specialist.
       Evaluate the candidate's submitted DSA code for correctness, performance, and best practices.
-      
+
       Problem Key: ${questionId}
       Programming Language: ${language || "javascript"}
       Candidate Submission:
       \`\`\`${language || "javascript"}
       ${code}
       \`\`\`
-      
+
       You must evaluate the code and respond with a JSON object strictly matching this schema:
       {
         "status": "solved" (if the code is correct, passes all logical edge cases, and has optimal or near-optimal complexity) or "attempted" (if there are bugs, compiler errors, infinite loops, or extremely poor space/time complexities),
         "score": (number from 0 to 10 evaluating the overall quality of the code),
         "timeComplexity": "e.g. O(N), O(N log N) or O(2^N)",
         "spaceComplexity": "e.g. O(1) or O(N)",
-        "feedback": "A concise, 2-3 sentence technical critique explaining if the logic is correct, and highlighting potential bottlenecks or clean-code tips."
+        "feedback": "A concise, 2-3 sentence technical critique explaining if the logic is correct, and highlighting potential bottlenecks or clean-code tips."     
       }
-      
+
       Respond ONLY with the JSON object. Do not wrap the JSON output in markdown formatting.
     `;
 
     // 4. Query Gemini
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: evaluationPrompt,
-      config: {
-        responseMimeType: "application/json",
-        temperature: 0.1
-      }
-    });
-
-    const rawJsonText = response.text?.trim() || "{}";
-    const result = JSON.parse(rawJsonText);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const result = await model.generateContent(evaluationPrompt);
+    const response = await result.response;
+    const rawJsonText = response.text()?.trim() || "{}";
+    
+    let resultJson;
+    try {
+      // Clean up potential markdown formatting if Gemini ignored the instruction
+      const cleanedJson = rawJsonText.replace(/```json|```/g, "").trim();
+      resultJson = JSON.parse(cleanedJson);
+    } catch (e) {
+      console.error("Failed to parse AI JSON:", rawJsonText);
+      resultJson = { status: "attempted", score: 5, feedback: "Error parsing AI feedback." };
+    }
 
     // 5. Connect to Database and retrieve User Doc
     await connectToDatabase();
@@ -71,12 +74,12 @@ export async function POST(req: Request) {
       { userId: userDoc._id, questionId },
       {
         $set: {
-          status: result.status || "attempted",
+          status: resultJson.status || "attempted",
           submittedCode: code,
-          feedback: result.feedback || "Attempt recorded.",
-          score: result.score || 5,
-          timeComplexity: result.timeComplexity || "N/A",
-          spaceComplexity: result.spaceComplexity || "N/A",
+          feedback: resultJson.feedback || "Attempt recorded.",
+          score: resultJson.score || 5,
+          timeComplexity: resultJson.timeComplexity || "N/A",
+          spaceComplexity: resultJson.spaceComplexity || "N/A",
           attemptedAt: new Date()
         }
       },
@@ -86,7 +89,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       result: practiceRecord,
-      evaluation: result
+      evaluation: resultJson
     });
 
   } catch (error: any) {

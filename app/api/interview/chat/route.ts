@@ -1,15 +1,15 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 
 // Initialize the Gemini API client
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 // System prompts mapped to interview tracks
 const TRACK_PERSONAS: Record<string, string> = {
   "java-dsa": `
     You are a Senior Principal Engineer and a notoriously strict DSA interviewer. 
     Your objective is to evaluate the candidate's deep understanding of Java core, memory management, and algorithmic complexity.
-    
+
     CRITICAL RULES:
     1. Do NOT write full solutions or code for the candidate.
     2. Focus heavily on Big O time/space complexity, edge cases, data structure choices, and Java internals (e.g., JVM memory, Garbage Collection, Collections framework).
@@ -19,8 +19,8 @@ const TRACK_PERSONAS: Record<string, string> = {
   `,
   "mern": `
     You are a Lead Full-Stack Architect specialized in the MERN stack (MongoDB, Express, React, Node.js).
-    Your objective is to evaluate the candidate's architecture choices, state management, asynchronous handling, performance optimization, and database indexing.
-    
+    Your objective is to evaluate the candidate's architecture choices, state management, asynchronous handling, performance optimization, and database indexing.   
+
     CRITICAL RULES:
     1. Do NOT provide boilerplate or working code blocks. Let the candidate architect the solution.
     2. Deep dive into React rendering behaviors, custom hooks, Node.js event loop blockages, MongoDB aggregation pipelines, and secure authentication flow.
@@ -30,10 +30,10 @@ const TRACK_PERSONAS: Record<string, string> = {
   `,
   "android": `
     You are a Principal Android Engineer specializing in modern native Android development.
-    Your objective is to evaluate the candidate's mastery of Kotlin, Jetpack Compose, Coroutines/Flows, architecture patterns (MVVM/MVI), and memory efficiency.
-    
+    Your objective is to evaluate the candidate's mastery of Kotlin, Jetpack Compose, Coroutines/Flows, architecture patterns (MVVM/MVI), and memory efficiency.    
+
     CRITICAL RULES:
-    1. Do NOT provide code snippets or UI layouts. 
+    1. Do NOT provide code snippets or UI layouts.
     2. Probe deeply into multi-threading pitfalls, memory leaks (e.g., lifecycle-aware components), Jetpack Compose recomposition optimization, and dependency injection (Hilt/Dagger).
     3. Question their state-handling strategies and how they manage configuration changes cleanly.
     4. Maintain a rigorous, senior-level tone. Push them to explain *why* they would choose one implementation over another.
@@ -56,24 +56,28 @@ export async function POST(req: Request) {
     `;
 
     // Format historical messages for Gemini API
-    // Ensure the structure matches Gemini's Content type array
-    const contents = messages.map((msg: any) => ({
+    const history = messages.slice(0, -1).map((msg: any) => ({
       role: msg.role === "user" ? "user" : "model",
       parts: [{ text: msg.content || msg.text }]
     }));
+    
+    const lastMessage = messages[messages.length - 1].content || messages[messages.length - 1].text;
 
-    // Call Gemini with the strict system instruction injected
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: contents,
-      config: {
-        systemInstruction: baseSystemInstruction,
-        temperature: 0.6, // Kept slightly lower for deterministic, sharp, and focused interviewing
-        maxOutputTokens: 600
-      }
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-flash",
+      systemInstruction: baseSystemInstruction,
     });
 
-    const aiResponseText = response.text || "I apologize, let's reset that. Can you repeat your last answer?";
+    const chat = model.startChat({
+      history: history,
+      generationConfig: {
+        maxOutputTokens: 600,
+        temperature: 0.6,
+      },
+    });
+
+    const result = await chat.sendMessage(lastMessage);
+    const aiResponseText = result.response.text() || "I apologize, let's reset that. Can you repeat your last answer?";
 
     return NextResponse.json({ text: aiResponseText });
 

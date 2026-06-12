@@ -4,12 +4,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import React, { useState } from "react";
+import { PortalLoader } from "@/components/PortalLoader";
 
 export default function LoginPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [animatingPortal, setAnimatingPortal] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,20 +31,25 @@ export default function LoginPage() {
         throw new Error("Invalid email address or password.");
       }
 
-      // SUCCESS: Tokens aur authentication state ko fresh karo pehle
+      // SUCCESS: Start loading animation sequence
+      setAnimatingPortal(true);
       router.refresh();
 
-      // 100ms ka micro-task gap taaki browser cookies internally lock kar sake
+      // 1.2-second high-impact loader sequence
       setTimeout(() => {
         router.push("/dashboard");
-      }, 100);
+      }, 1200);
 
     } catch (err) {
       setErrorMessage(err instanceof Error ? err.message : "Login failed.");
-    } finally {
       setLoading(false);
     }
   };
+
+  if (animatingPortal) {
+    return <PortalLoader />;
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center p-4 sm:p-6 bg-slate-950">
       <div className="w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-slate-900/80 shadow-[0_28px_90px_-38px_rgba(0,0,0,0.8)] backdrop-blur">

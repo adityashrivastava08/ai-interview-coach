@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -6,7 +6,7 @@ import { connectToDatabase } from "@/lib/db";
 import { Interview } from "@/models/Interview";
 import { User } from "@/models/User";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 export async function POST(req: Request) {
   try {
@@ -37,11 +37,11 @@ export async function POST(req: Request) {
     const evaluationPrompt = `
       You are an expert Senior Technical Recruiter and Bar Raiser.
       Evaluate the technical mock interview dialogue transcript between the Interviewer and the Candidate.
-      
+
       Track Domain: ${track}
       Full Transcript:
       ${transcriptText}
-      
+
       Analyze the candidate's performance. Review each question asked and their corresponding answer.
       You must respond with a JSON object strictly containing the following schema:
       {
@@ -56,32 +56,28 @@ export async function POST(req: Request) {
           }
         ]
       }
-      
+
       Important rules for formatting the JSON array:
       - Pair each question asked by the interviewer with the subsequent answer given by the candidate.
       - If a question was skipped or not answered, record userAnswer as "[No response]" or "[Skipped]" and score accordingly.
       - Respond ONLY with the raw JSON object. Do not wrap the JSON output in markdown formatting.
     `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: evaluationPrompt,
-      config: {
-        responseMimeType: "application/json",
-        temperature: 0.2
-      }
-    });
-
-    const rawJsonText = response.text?.trim() || "{}";
-    let result: any = {};
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const result = await model.generateContent(evaluationPrompt);
+    const response = await result.response;
+    const rawJsonText = response.text()?.trim() || "{}";
+    
+    let evaluationResult: any = {};
     try {
-      result = JSON.parse(rawJsonText);
+      const cleanedJson = rawJsonText.replace(/```json|```/g, "").trim();
+      evaluationResult = JSON.parse(cleanedJson);
     } catch (parseErr: any) {
       console.warn("Standard JSON parse failed, trying regex extraction...", parseErr);
       const jsonMatch = rawJsonText.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         try {
-          result = JSON.parse(jsonMatch[0]);
+          evaluationResult = JSON.parse(jsonMatch[0]);
         } catch (matchErr: any) {
           console.error("JSON extraction parse failed:", matchErr);
           throw new Error("Invalid evaluation format returned by AI: " + matchErr.message);
@@ -95,9 +91,9 @@ export async function POST(req: Request) {
     const newInterview = await Interview.create({
       userId: userDoc._id,
       topic: track.replace("-", " ").toUpperCase(),
-      score: result.overallScore || 6,
-      feedback: result.overallFeedback || "Evaluation completed successfully.",
-      questions: (result.questions || []).map((q: any) => ({
+      score: evaluationResult.overallScore || 6,
+      feedback: evaluationResult.overallFeedback || "Evaluation completed successfully.",
+      questions: (evaluationResult.questions || []).map((q: any) => ({
         questionText: q.questionText || "DSA / Technical concept overview",
         userAnswer: q.userAnswer || "",
         score: q.score || 5,

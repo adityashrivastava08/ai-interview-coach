@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { PortalLoader } from "@/components/PortalLoader";
 
 export default function RegisterPage() {
   const router = useRouter(); // Next.js tool used to transition between page URLs
@@ -10,6 +11,7 @@ export default function RegisterPage() {
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [animatingPortal, setAnimatingPortal] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();       // Stop the browser from executing a default page refresh
@@ -41,13 +43,20 @@ export default function RegisterPage() {
         throw new Error(displayError);
       }
 
-      router.push("/login");
+      setAnimatingPortal(true);
+      setTimeout(() => {
+        router.push("/login");
+      }, 1200);
+
     } catch (err) {
       setErrorMessage(err instanceof Error ? err.message : "Registration failed.");
-    } finally {
       setLoading(false);
     }
   };
+
+  if (animatingPortal) {
+    return <PortalLoader />;
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4 sm:p-6 bg-slate-950">

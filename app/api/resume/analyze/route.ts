@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -6,7 +6,7 @@ import { connectToDatabase } from "@/lib/db";
 import { Resume } from "@/models/Resume";
 import { User } from "@/models/User";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 export async function POST(req: Request) {
   try {
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     const resumePrompt = `
       You are an expert ATS (Applicant Tracking System) reviewer and technical recruitment specialist.
       Analyze the attached candidate resume PDF and perform a thorough evaluation.
-      
+
       You must respond with a JSON object strictly containing the following schema:
       {
         "atsScore": (number between 0 and 100 representing the ATS matching grade),
@@ -43,38 +43,34 @@ export async function POST(req: Request) {
         "suggestedQuestions": (array of 3 to 5 custom technical or behavioral interview questions tailored specifically to their resume profile to prepare them for mock interviews),
         "feedback": (string containing a concise, professional diagnostic summary and optimization advice)
       }
-      
+
       Respond ONLY with the JSON object. Do not wrap the JSON output in markdown formatting.
     `;
 
     // 5. Query Gemini with base64 PDF inline data
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: [
-        {
-          role: "user",
-          parts: [
-            { text: resumePrompt },
-            {
-              inlineData: {
-                mimeType: mimeType || "application/pdf",
-                data: fileData
-              }
-            }
-          ]
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const result = await model.generateContent([
+      {
+        inlineData: {
+          mimeType: mimeType || "application/pdf",
+          data: fileData
         }
-      ],
-      config: {
-        responseMimeType: "application/json",
-        temperature: 0.2
-      }
-    });
-
-    const rawJsonText = response.text?.trim() || "{}";
-    const analysisResult = JSON.parse(rawJsonText);
+      },
+      { text: resumePrompt }
+    ]);
+    const response = await result.response;
+    const rawJsonText = response.text()?.trim() || "{}";
+    
+    let analysisResult;
+    try {
+      const cleanedJson = rawJsonText.replace(/```json|```/g, "").trim();
+      analysisResult = JSON.parse(cleanedJson);
+    } catch (e) {
+      console.error("Failed to parse Resume AI JSON:", rawJsonText);
+      analysisResult = { atsScore: 0, feedback: "Error analyzing resume." };
+    }
 
     // 6. Save/Update Resume record in Database
-    // We save the raw JSON string inside textContent to preserve the structure perfectly
     const resumeRecord = await Resume.findOneAndUpdate(
       { userId: userDoc._id },
       {

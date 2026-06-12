@@ -1,7 +1,7 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
-import { GoogleGenAI } from "@google/genai";
-import { connectToDatabase } from "../../../../lib/db";
-import { Interview } from "../../../../models/Interview";
+import { connectToDatabase } from "@/lib/db";
+import { Interview } from "@/models/Interview";
 
 const apiKey = process.env.GEMINI_API_KEY;
 
@@ -17,12 +17,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing session context parameters." }, { status: 400 });
     }
 
-    const ai = new GoogleGenAI({ apiKey });
+    const genAI = new GoogleGenerativeAI(apiKey);
 
     const diagnosticInstruction = `
       You are an Executive Technical Bar Raiser evaluating a completed technical interview.
-      Review the provided transcript of the conversation, focusing on the candidate's Java code quality, optimization logic, and problem-solving communication.
-      
+      Review the provided transcript of the conversation, focusing on the candidate's technical code quality, optimization logic, and problem-solving communication.     
+
       You must evaluate their performance and provide a response strictly in this formatting template:
       [SUMMARY] Write a professional 3-4 sentence comprehensive breakdown summary of their strengths and explicit areas for growth.
       [FINAL_SCORE] Provide a single integer rating from 1 to 10 evaluating their readiness. Do not include extra text in this block.
@@ -33,13 +33,14 @@ export async function POST(req: Request) {
       .map((msg: any) => `${msg.role === "user" ? "Candidate" : "Interviewer"}: ${msg.text}`)
       .join("\n\n");
 
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: `Complete Interview Transcript:\n\n${transcriptText}`,
-      config: { systemInstruction: diagnosticInstruction, temperature: 0.3 } // Lower temperature for more accurate grading
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-flash",
+      systemInstruction: diagnosticInstruction
     });
-
-    const rawOutput = response.text || "";
+    
+    const result = await model.generateContent(`Complete Interview Transcript:\n\n${transcriptText}`);
+    const response = await result.response;
+    const rawOutput = response.text() || "";
 
     // Parse values from our custom diagnostic layout brackets
     const summaryText = rawOutput.split("[FINAL_SCORE]")[0]?.replace("[SUMMARY]", "")?.trim() || "Evaluation completed successfully.";
@@ -56,10 +57,10 @@ export async function POST(req: Request) {
       }
     });
 
-    return NextResponse.json({ 
-      success: true, 
-      finalScore: numericScore, 
-      feedbackSummary: summaryText 
+    return NextResponse.json({
+      success: true,
+      finalScore: numericScore,
+      feedbackSummary: summaryText
     });
 
   } catch (error: any) {
