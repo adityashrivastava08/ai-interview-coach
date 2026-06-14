@@ -6,6 +6,7 @@ import { connectToDatabase } from "@/lib/db";
 import { Resume } from "@/models/Resume";
 import { User } from "@/models/User";
 
+export const maxDuration = 60; // Timeout ko badha kar 60 seconds kar dega
 export async function POST(req: Request) {
   try {
     if (!process.env.GEMINI_API_KEY) {
