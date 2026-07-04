@@ -53,44 +53,47 @@ export default function LandingPage() {
 
   // Jab tak session check ho raha hai, tab tak ek clean subtle loader dikhao
   if (status === "loading") {
-    return <div className="flex min-h-screen items-center justify-center bg-slate-950 font-mono text-xs tracking-widest text-slate-600">VERIFYING CONNECTION...</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background font-sans text-xs tracking-widest text-muted-foreground uppercase">
+        Verifying Connection...
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-cyan-500/30 overflow-x-hidden relative">
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute left-[-5%] top-10 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
-        <div className="absolute right-[-10%] top-32 h-96 w-96 rounded-full bg-indigo-500/10 blur-3xl" />
-        <div className="absolute right-20 bottom-20 h-80 w-80 rounded-[36%] bg-sky-500/10 blur-3xl" />
-        <div className="absolute left-10 top-[55%] h-[320px] w-[320px] rounded-full bg-slate-900/60 shadow-[0_80px_120px_rgba(56,189,248,0.05)] transform rotate-12" />
+    <div className="min-h-screen bg-background text-foreground selection:bg-secondary overflow-x-hidden relative">
+      
+      {/* Editorial Decorative Grid Lines (Pure CSS Subtle Artistry) */}
+      <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden opacity-[0.25] dark:opacity-[0.15]">
+        <div className="absolute left-[10%] top-0 h-full w-[1px] bg-border" />
+        <div className="absolute left-[50%] top-0 h-full w-[1px] bg-border" />
+        <div className="absolute left-[90%] top-0 h-full w-[1px] bg-border" />
       </div>
-      <div className="absolute top-0 left-1/4 h-[500px] w-[500px] rounded-full bg-cyan-500/5 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-10 right-1/4 h-[400px] w-[400px] rounded-full bg-sky-500/5 blur-[120px] pointer-events-none" />
 
       {/* Top Header Navbar */}
-      <header className="sticky top-0 z-50 bg-slate-950/80 border-b border-white/10 backdrop-blur-xl px-6 py-4 shadow-lg shadow-black/20">
+      <header className="sticky top-0 z-50 bg-background/80 border-b border-border backdrop-blur-xl px-6 py-4">
         <div className="mx-auto max-w-7xl flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-cyan-400 flex items-center justify-center font-black text-slate-950 shadow-lg shadow-sky-350/20">
-              ⚡
-            </div>
-            <span className="text-lg font-black tracking-wider text-white">
+          <div className="flex items-center gap-2.5">
+            <svg className="h-6 w-6 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+            </svg>
+            <span className="text-xl font-bold tracking-tight text-foreground">
               PrepPath
             </span>
           </div>
 
           {/* Action CTA Buttons */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-5">
             <button
               onClick={() => router.push("/login")}
-              className="text-sm font-semibold text-slate-300 hover:text-white transition"
+              className="text-xs font-bold tracking-wider uppercase text-muted-foreground hover:text-foreground transition duration-200"
             >
               Sign In
             </button>
             <button
               onClick={() => router.push("/register")}
-              className="rounded-full bg-sky-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-sky-400/30 transition hover:bg-sky-500"
+              className="btn-primary text-xs uppercase tracking-wider px-5 py-2.5"
             >
               Sign Up
             </button>
@@ -99,187 +102,247 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section Container */}
-      <main className="mx-auto max-w-7xl px-4 pt-20 pb-20 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid gap-16 grid-cols-1 items-start">
-          <section className="space-y-10 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-[10px] font-mono uppercase tracking-widest text-blue-400">
-              <span>✨ Next-Gen AI Placement Prep Platform Live</span>
-            </div>
+      <main className="mx-auto max-w-7xl px-6 md:px-8 pt-16 md:pt-24 pb-20 relative z-10">
+        
+        {/* Intro Badge & Bold Serif Title */}
+        <section className="text-center max-w-4xl mx-auto space-y-8 mb-20">
+          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-3.5 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+            <span>Placement Prep Platform Live</span>
+          </div>
 
-            <div>
-              <h1 className="text-4xl font-black tracking-tight text-white sm:text-6xl max-w-4xl mx-auto lg:mx-0 leading-[1.05]">
-                Ace Your Placements With <span className="bg-gradient-to-r from-blue-400 via-sky-400 to-cyan-400 bg-clip-text text-transparent">AI Mock Interviews & Resume ATS Audit</span>
-              </h1>
-              <p className="mt-6 text-sm sm:text-base text-slate-400 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-                PrepPath helps you build placement readiness. Evaluate resume ATS scoring, practice curated coding questions with real-time feedback, and take high-stakes simulated AI mock interviews.
+          <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-foreground leading-[1.08] text-balance">
+            Ace Your Placements With <span className="text-primary italic">AI Mock Interviews</span> & ATS Auditing
+          </h1>
+          
+          <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed text-balance">
+            PrepPath helps you build placement readiness. Evaluate resume ATS scoring, practice curated coding questions with real-time feedback, and take high-stakes simulated AI mock interviews.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+            <button
+              onClick={() => router.push("/register")}
+              className="w-full sm:w-auto btn-primary text-xs uppercase tracking-wider px-8 py-4 font-bold shadow-sm"
+            >
+              Start Preparing Now
+            </button>
+            <button
+              onClick={() => router.push("/login")}
+              className="w-full sm:w-auto btn-secondary text-xs uppercase tracking-wider px-8 py-4 font-bold"
+            >
+              Enter Dashboard
+            </button>
+          </div>
+        </section>
+
+        {/* Brand Core Pillars Section (Sophisticated Asymmetrical Grid) */}
+        <section className="border-t border-border pt-16 mb-24 grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
+          <div className="lg:col-span-1 space-y-4">
+            <p className="text-[10px] font-bold tracking-widest text-primary uppercase font-mono">01 / Services</p>
+            <h2 className="font-serif text-3xl font-extrabold tracking-tight text-foreground">
+              What You Get
+            </h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              We design state-of-the-art diagnostic interfaces to pinpoint development goals for high-stakes placement rounds.
+            </p>
+          </div>
+
+          <div className="lg:col-span-2 space-y-6">
+            <div className="group border border-border bg-card p-8 rounded-lg hover:border-primary/40 transition duration-300">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-primary font-mono mb-2">Interviews & Feedback</p>
+              <h3 className="text-lg font-bold text-foreground mb-2">Interview Practice</h3>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                Build confidence with realistic mock interviews, answer coaching, and feedback tailored to placement round expectations.
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-              <button
-                onClick={() => router.push("/register")}
-                className="cursor-pointer w-full sm:w-auto rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 px-8 py-4 text-xs font-black text-white shadow-2xl shadow-blue-500/20 transition hover:scale-[1.01] uppercase tracking-wider"
-              >
-                Start Preparing Now ➔
-              </button>
-              <button
-                onClick={() => router.push("/login")}
-                className="cursor-pointer w-full sm:w-auto rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 px-8 py-4 text-xs font-bold text-white transition"
-              >
-                Enter Dashboard
-              </button>
+            <div className="group border border-border bg-card p-8 rounded-lg hover:border-primary/40 transition duration-300">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-primary font-mono mb-2">Algorithm Evaluation</p>
+              <h3 className="text-lg font-bold text-foreground mb-2">DSA Skill Strengthening</h3>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                Strengthen classic placement topics like arrays, strings, trees, graphs, and dynamic programming with AI guidance on efficiency and edge cases.
+              </p>
             </div>
-          </section>
 
-          <section className="rounded-3xl border border-white/10 bg-slate-900/60 p-8 shadow-xl shadow-black/20 backdrop-blur-sm">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.3em] text-sky-400 mb-6">What You Get</h2>
-            <div className="space-y-6 text-left text-slate-300">
-              <div className="rounded-3xl border border-white/5 bg-slate-950/40 p-6 shadow-sm">
-                <p className="text-xs uppercase tracking-[0.28em] text-slate-400 mb-2">Interview Practice</p>
-                <p className="text-sm leading-7 text-slate-300">
-                  Build confidence with realistic mock interviews, answer coaching, and feedback tailored to placement round expectations.
-                </p>
-              </div>
-              <div className="rounded-3xl border border-white/5 bg-slate-950/40 p-6 shadow-sm">
-                <p className="text-xs uppercase tracking-[0.28em] text-slate-400 mb-2">DSA Skill Strengthening</p>
-                <p className="text-sm leading-7 text-slate-300">
-                  Strengthen classic placement topics like arrays, strings, trees, graphs, and dynamic programming with AI guidance on efficiency and edge cases.
-                </p>
-              </div>
-              <div className="rounded-3xl border border-white/5 bg-slate-950/40 p-6 shadow-sm">
-                <p className="text-xs uppercase tracking-[0.28em] text-slate-400 mb-2">Placement Preparation</p>
-                <p className="text-sm leading-7 text-slate-300">
-                  Prepare for campus and hiring rounds with structured prep, resume guidance, and practice that matches what companies ask for.
-                </p>
-              </div>
+            <div className="group border border-border bg-card p-8 rounded-lg hover:border-primary/40 transition duration-300">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-primary font-mono mb-2">End-to-End Readiness</p>
+              <h3 className="text-lg font-bold text-foreground mb-2">Placement Preparation</h3>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                Prepare for campus and hiring rounds with structured prep, resume guidance, and practice that matches what companies ask for.
+              </p>
             </div>
-          </section>
-        </div>
+          </div>
+        </section>
 
-        <div className="mt-24 border-t border-white/10 pt-16">
-          <h2 className="text-xs font-mono uppercase tracking-widest text-slate-400 font-bold mb-12">Engineered Core Architectures</h2>
-          <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 text-left">
-            <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-6 shadow-sm">
-              <div className="text-2xl mb-3">💬</div>
-              <h3 className="text-sm font-black text-white mb-1">Multi-Turn Active Dialogue</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
+        {/* Engineered Architecture Grid */}
+        <section className="border-t border-border pt-16 mb-24">
+          <div className="mb-12 space-y-2">
+            <p className="text-[10px] font-bold tracking-widest text-primary uppercase font-mono">02 / Architecture</p>
+            <h2 className="font-serif text-3xl font-extrabold tracking-tight text-foreground">
+              Engineered Core Architectures
+            </h2>
+          </div>
+
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
+            <div className="border border-border bg-card p-8 rounded-lg">
+              <div className="h-10 w-10 bg-secondary rounded flex items-center justify-center text-primary mb-6">
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+              </div>
+              <h3 className="text-base font-bold text-foreground mb-2">Multi-Turn Active Dialogue</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 Don&apos;t just submit code. Respond to technical follow-up challenge queries dynamically with full conversational context memory retention.
               </p>
             </div>
-            <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-6 shadow-sm">
-              <div className="text-2xl mb-3">📈</div>
-              <h3 className="text-sm font-black text-white mb-1">Graphical Trend Metrics</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
+
+            <div className="border border-border bg-card p-8 rounded-lg">
+              <div className="h-10 w-10 bg-secondary rounded flex items-center justify-center text-primary mb-6">
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="20" x2="18" y2="10" />
+                  <line x1="12" y1="20" x2="12" y2="4" />
+                  <line x1="6" y1="20" x2="6" y2="14" />
+                </svg>
+              </div>
+              <h3 className="text-base font-bold text-foreground mb-2">Graphical Trend Metrics</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 Track regression profiles using interactive linear graphs and matrix visualizations fed straight by persistent data clusters.
               </p>
             </div>
-            <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-6 shadow-sm">
-              <div className="text-2xl mb-3">🧬</div>
-              <h3 className="text-sm font-black text-white mb-1">Domain Multi-Track Hub</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
+
+            <div className="border border-border bg-card p-8 rounded-lg">
+              <div className="h-10 w-10 bg-secondary rounded flex items-center justify-center text-primary mb-6">
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="2" y1="12" x2="22" y2="12" />
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                </svg>
+              </div>
+              <h3 className="text-base font-bold text-foreground mb-2">Domain Multi-Track Hub</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 A unified preparation experience for interviews, resume checks, and coding progress tracking all in one dashboard.
               </p>
             </div>
           </div>
-        </div>
+        </section>
 
-        <section className="mt-24 grid gap-10 grid-cols-1">
-          <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-10 shadow-xl shadow-black/20 backdrop-blur-sm">
-            <h2 className="text-2xl font-black text-white mb-4">Interview, DSA Practice & Placement Preparation</h2>
-            <p className="text-sm text-slate-300 leading-8 mb-6 max-w-2xl">
+        {/* Detailed Services list and Contact form split */}
+        <section className="border-t border-border pt-16 grid grid-cols-1 lg:grid-cols-2 gap-12">
+          
+          {/* Left Column: Mission Description */}
+          <div className="space-y-8">
+            <div className="space-y-2">
+              <p className="text-[10px] font-bold tracking-widest text-primary uppercase font-mono">03 / Mission</p>
+              <h2 className="font-serif text-3xl font-extrabold tracking-tight text-foreground">
+                Interview, DSA Practice & Placement Preparation
+              </h2>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed text-balance">
               PrepPath is designed for candidates who want a complete placement-ready journey. Practice mock interviews, sharpen DSA skills, and polish your preparation for real placement rounds.
             </p>
-            <div className="space-y-4 text-sm text-slate-300">
-              <div className="rounded-2xl bg-slate-950/40 p-5 border border-white/5">
-                <p className="font-bold text-white mb-2">Interview Practice</p>
-                <p>Build confidence with realistic mock interviews, answer coaching, and interview feedback tailored to placement round expectations.</p>
+            <div className="space-y-4 border-l-2 border-border pl-6">
+              <div>
+                <p className="font-bold text-foreground text-sm">Interview Practice</p>
+                <p className="text-xs text-muted-foreground mt-1">Build confidence with realistic mock interviews, answer coaching, and interview feedback tailored to placement round expectations.</p>
               </div>
-              <div className="rounded-2xl bg-slate-950/40 p-5 border border-white/5">
-                <p className="font-bold text-white mb-2">DSA Practice</p>
-                <p>Strengthen classic placement topics like arrays, strings, trees, graphs, and dynamic programming with AI guidance on efficiency and edge cases.</p>
+              <div>
+                <p className="font-bold text-foreground text-sm">DSA Practice</p>
+                <p className="text-xs text-muted-foreground mt-1">Strengthen classic placement topics like arrays, strings, trees, graphs, and dynamic programming with AI guidance on efficiency and edge cases.</p>
               </div>
-              <div className="rounded-2xl bg-slate-950/40 p-5 border border-white/5">
-                <p className="font-bold text-white mb-2">Placement Preparation</p>
-                <p>Get ready for campus and hiring rounds with structured prep, resume guidance, and practice that matches what companies ask for.</p>
+              <div>
+                <p className="font-bold text-foreground text-sm">Placement Preparation</p>
+                <p className="text-xs text-muted-foreground mt-1">Get ready for campus and hiring rounds with structured prep, resume guidance, and practice that matches what companies ask for.</p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-3xl border border-white/10 bg-slate-900/80 p-8 shadow-xl shadow-slate-950/30 backdrop-blur-lg">
-            <h2 className="text-2xl font-black text-white mb-4">Contact Us</h2>
-            <p className="text-sm text-slate-400 leading-7 mb-8">
+          {/* Right Column: Contact form */}
+          <div className="border border-border bg-card p-8 rounded-lg">
+            <h2 className="font-serif text-2xl font-extrabold text-foreground mb-2">Contact Us</h2>
+            <p className="text-xs text-muted-foreground leading-relaxed mb-6">
               Reach out with your preparation goals, project ideas, or questions about PrepPath. Your message is stored securely and our team will follow up soon.
             </p>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div className="grid gap-4 sm:grid-cols-2">
-                <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                  Name
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                    Name
+                  </label>
                   <input
                     type="text"
                     value={contactForm.name}
                     onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
-                    className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/90 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-400"
+                    className="w-full rounded border border-border bg-background px-3.5 py-2.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
                     placeholder="Your name"
                     required
                   />
-                </label>
-                <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                  Email
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                    Email
+                  </label>
                   <input
                     type="email"
                     value={contactForm.email}
                     onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
-                    className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/90 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-400"
+                    className="w-full rounded border border-border bg-background px-3.5 py-2.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
                     placeholder="you@example.com"
                     required
                   />
-                </label>
+                </div>
               </div>
 
-              <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                Subject
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                  Subject
+                </label>
                 <input
                   type="text"
                   value={contactForm.subject}
                   onChange={(e) => setContactForm({ ...contactForm, subject: e.target.value })}
-                  className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/90 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-400"
+                  className="w-full rounded border border-border bg-background px-3.5 py-2.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
                   placeholder="What would you like to discuss?"
                 />
-              </label>
+              </div>
 
-              <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                Message
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                  Message
+                </label>
                 <textarea
                   value={contactForm.message}
                   onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
-                  className="mt-2 h-36 w-full rounded-3xl border border-white/10 bg-slate-950/90 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-400 resize-none"
+                  className="h-32 w-full rounded border border-border bg-background px-3.5 py-2.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-1 focus:ring-primary resize-none"
                   placeholder="Tell us about your preparation goals or questions."
                   required
                 />
-              </label>
+              </div>
 
               <button
                 type="submit"
-                className="w-full rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 px-5 py-3 text-sm font-black text-slate-950 transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+                className="w-full btn-primary text-xs uppercase tracking-wider py-3"
                 disabled={submitStatus === "sending"}
               >
                 {submitStatus === "sending" ? "Sending..." : "Send Message"}
               </button>
 
               {submitMessage ? (
-                <p className={`text-sm ${submitStatus === "success" ? "text-emerald-400" : "text-rose-400"}`}>
+                <p className={`text-xs font-bold text-center mt-2 ${submitStatus === "success" ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
                   {submitMessage}
                 </p>
               ) : null}
             </form>
           </div>
         </section>
+
       </main>
 
       {/* Small Footer Block */}
-      <footer className="border-t border-white/5 py-8 text-center text-xs font-mono text-slate-600 relative z-10">
+      <footer className="border-t border-border py-10 text-center text-[10px] tracking-wider font-mono text-muted-foreground uppercase">
         © 2026 PrepPath Placement Prep Platform. All rights reserved.
       </footer>
     </div>
   );
 }
+

@@ -51,33 +51,39 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4 sm:p-6 bg-slate-950">
-      <div className="w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-slate-900/80 shadow-[0_28px_90px_-38px_rgba(0,0,0,0.8)] backdrop-blur">
-        <div className="h-2 bg-[linear-gradient(90deg,#06b6d4,#3b82f6,#6366f1,#f59e0b)]" />
+    <div className="flex min-h-screen items-center justify-center p-4 sm:p-6 bg-background text-foreground relative">
+      {/* Editorial Gridlines */}
+      <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden opacity-[0.25] dark:opacity-[0.15]">
+        <div className="absolute left-[20%] top-0 h-full w-[1px] bg-border" />
+        <div className="absolute right-[20%] top-0 h-full w-[1px] bg-border" />
+      </div>
+
+      <div className="w-full max-w-md overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-all duration-350 hover:shadow-lg">
+        <div className="h-1.5 bg-primary" />
         <div className="p-6 sm:p-8">
-          <div className="mb-7 text-center">
-            <p className="mb-3 inline-flex rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-blue-400 animate-pulse">
+          <div className="mb-8 text-center space-y-2">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-primary font-mono bg-secondary px-3 py-1 rounded">
               PrepPath
-            </p>
-            <h2 className="mb-2 text-3xl font-black tracking-tight text-white">Welcome back</h2>
-            <p className="text-sm text-slate-400">Sign in to continue practicing</p>
+            </span>
+            <h2 className="text-3xl font-serif font-bold tracking-tight text-foreground pt-2">Welcome back</h2>
+            <p className="text-xs text-muted-foreground">Sign in to continue practicing</p>
           </div>
 
           {errorMessage && (
-            <div className="mb-4 rounded-lg border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-400 whitespace-pre-wrap break-words">
+            <div className="mb-5 rounded border border-rose-500/20 bg-rose-500/5 p-3.5 text-xs text-rose-600 dark:text-rose-450 whitespace-pre-wrap break-words font-medium">
               {errorMessage}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="mb-1.5 block text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+              <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                 Email Address
               </label>
               <input
                 type="email"
                 required
-                className="w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2.5 text-sm text-white shadow-inner outline-none transition focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10"
+                className="w-full rounded border border-border bg-background px-3.5 py-2.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
                 placeholder="you@example.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -85,13 +91,13 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+              <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                 Password
               </label>
               <input
                 type="password"
                 required
-                className="w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2.5 text-sm text-white shadow-inner outline-none transition focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10"
+                className="w-full rounded border border-border bg-background px-3.5 py-2.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
                 placeholder="********"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -101,15 +107,15 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="mt-2 w-full cursor-pointer rounded-lg bg-gradient-to-r from-cyan-400 to-blue-500 py-2.5 text-sm font-bold text-slate-950 shadow-lg shadow-cyan-500/10 transition hover:opacity-90 disabled:opacity-50 font-black uppercase tracking-wider"
+              className="mt-3 w-full btn-primary text-xs uppercase tracking-wider py-3"
             >
               {loading ? "Signing In..." : "Sign In"}
             </button>
           </form>
 
-          <p className="mt-5 text-center text-sm text-slate-400">
+          <p className="mt-6 text-center text-xs text-muted-foreground">
             Need an account?{" "}
-            <Link href="/register" className="font-semibold text-cyan-400 underline decoration-cyan-400/30 underline-offset-4 hover:text-cyan-300">
+            <Link href="/register" className="font-bold text-primary hover:underline underline-offset-4 transition">
               Sign up
             </Link>
           </p>
@@ -117,4 +123,4 @@ export default function LoginPage() {
       </div>
     </div>
   );
-}
+}

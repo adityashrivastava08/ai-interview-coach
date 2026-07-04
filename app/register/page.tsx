@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { PortalLoader } from "@/components/PortalLoader";
 
 export default function RegisterPage() {
@@ -16,7 +17,9 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();       // Stop the browser from executing a default page refresh
     setErrorMessage("");      // Reset old validation alerts
-    setLoading(true);         // Lock button interaction during processing
+    if (loading) return;      // Lock button interaction during processing
+    setLoading(true);
+
 
     try {
       // Execute an explicit HTTP network request down to our backend handler route
@@ -59,72 +62,86 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4 sm:p-6 bg-slate-950">
-      <div className="w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-slate-900/80 shadow-[0_28px_90px_-38px_rgba(0,0,0,0.8)] backdrop-blur">
-        <div className="h-2 bg-[linear-gradient(90deg,#0f766e,#06b6d4,#fb7185,#f59e0b)]" />
+    <div className="flex min-h-screen items-center justify-center p-4 sm:p-6 bg-background text-foreground relative">
+      {/* Editorial Gridlines */}
+      <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden opacity-[0.25] dark:opacity-[0.15]">
+        <div className="absolute left-[20%] top-0 h-full w-[1px] bg-border" />
+        <div className="absolute right-[20%] top-0 h-full w-[1px] bg-border" />
+      </div>
+
+      <div className="w-full max-w-md overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-all duration-350 hover:shadow-lg">
+        <div className="h-1.5 bg-primary" />
         <div className="p-6 sm:p-8">
-          <div className="mb-7 text-center">
-            <p className="mb-3 inline-flex rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-teal-400 animate-pulse">
+          <div className="mb-8 text-center space-y-2">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-primary font-mono bg-secondary px-3 py-1 rounded">
               PrepPath
-            </p>
-            <h2 className="mb-2 text-3xl font-black tracking-tight text-white">Create your account</h2>
-            <p className="text-sm text-slate-400">Start practicing your technical interviews</p>
+            </span>
+            <h2 className="text-3xl font-serif font-bold tracking-tight text-foreground pt-2">Create account</h2>
+            <p className="text-xs text-muted-foreground">Start practicing your technical interviews</p>
           </div>
 
-        {/* Dynamic Error Container Box */}
-        {errorMessage && (
-          <div className="mb-4 rounded-lg border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-400 whitespace-pre-wrap break-words">
-            {errorMessage}
-          </div>
-        )}
+          {/* Dynamic Error Container Box */}
+          {errorMessage && (
+            <div className="mb-5 rounded border border-rose-500/20 bg-rose-500/5 p-3.5 text-xs text-rose-600 dark:text-rose-455 whitespace-pre-wrap break-words font-medium">
+              {errorMessage}
+            </div>
+          )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="mb-1.5 block text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Full Name</label>
-            <input
-              type="text"
-              required
-              className="w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2.5 text-sm text-white shadow-inner outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
-              placeholder="Aditya Ranjan"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Full Name</label>
+              <input
+                type="text"
+                required
+                className="w-full rounded border border-border bg-background px-3.5 py-2.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
+                placeholder="Aditya Ranjan"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+            </div>
 
-          <div>
-            <label className="mb-1.5 block text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Email Address</label>
-            <input
-              type="email"
-              required
-              className="w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2.5 text-sm text-white shadow-inner outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
-              placeholder="you@example.com"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            />
-          </div>
+            <div>
+              <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Email Address</label>
+              <input
+                type="email"
+                required
+                className="w-full rounded border border-border bg-background px-3.5 py-2.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
+                placeholder="you@example.com"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              />
+            </div>
 
-          <div>
-            <label className="mb-1.5 block text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Password</label>
-            <input
-              type="password"
-              required
-              className="w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2.5 text-sm text-white shadow-inner outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
-              placeholder="********"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            />
-          </div>
+            <div>
+              <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Password</label>
+              <input
+                type="password"
+                required
+                className="w-full rounded border border-border bg-background px-3.5 py-2.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
+                placeholder="********"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="mt-2 w-full cursor-pointer rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 py-2.5 text-sm font-bold text-slate-950 shadow-lg shadow-teal-500/10 transition hover:opacity-90 disabled:opacity-50 font-black uppercase tracking-wider"
-          >
-            {loading ? "Creating Account..." : "Sign Up"}
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={loading}
+              className="mt-3 w-full btn-primary text-xs uppercase tracking-wider py-3"
+            >
+              {loading ? "Creating Account..." : "Sign Up"}
+            </button>
+          </form>
+
+          <p className="mt-6 text-center text-xs text-muted-foreground">
+            Have an account?{" "}
+            <Link href="/login" className="font-bold text-primary hover:underline underline-offset-4 transition">
+              Sign in
+            </Link>
+          </p>
         </div>
       </div>
     </div>
   );
 }
+

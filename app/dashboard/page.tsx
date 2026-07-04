@@ -75,7 +75,7 @@ export default function UserDashboard() {
   // ⚙️ CORE STATE HOOKS BLOCK
   // ==========================================
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [theme, setTheme] = useState("dark");
+  const [theme, setTheme] = useState("light");
   const [avatarDropdownActive, setAvatarDropdownActive] = useState(false);
 
   // History & Statistics state
@@ -199,7 +199,7 @@ export default function UserDashboard() {
   // 🌓 THEME CONTROL LAYER
   // ==========================================
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") || "dark";
+    const savedTheme = localStorage.getItem("theme") || "light";
     setTheme(savedTheme);
     if (savedTheme === "dark") {
       document.documentElement.classList.add("dark");
@@ -556,25 +556,31 @@ export default function UserDashboard() {
   };
 
   return (
-    <div className="min-h-screen font-sans transition-colors duration-300 bg-slate-50 dark:bg-[#0f172a] text-[#0f172a] dark:text-[#f1f5f9]">
+    <div className="min-h-screen font-sans transition-colors duration-300 bg-background text-foreground relative">
+      {/* Editorial Grid Lines */}
+      <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden opacity-[0.2] dark:opacity-[0.1]">
+        <div className="absolute left-[50%] top-0 h-full w-[1px] bg-border" />
+      </div>
       
       {/* =========================================================
           ⚡ REDESIGNED STICKY GLASSMORPHIC NAVIGATION HEADER
          ========================================================= */}
-      <nav className="sticky top-0 z-50 px-4 md:px-8 py-4 bg-[#f8fafc]/40 dark:bg-[#0f172a]/40 border-b border-slate-200/50 dark:border-[#334155]/30 backdrop-blur-xl transition-all duration-300">
+      <nav className="sticky top-0 z-50 px-4 md:px-8 py-4 bg-card/90 border-b border-border backdrop-blur-xl transition-all duration-300">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-2 cursor-pointer group" onClick={() => setActiveTab("dashboard")}>
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-black text-white shadow-md shadow-blue-500/25 group-hover:scale-105 transition-transform">
-              ⚡
+            <div className="h-9 w-9 rounded bg-primary flex items-center justify-center font-black text-primary-foreground shadow-sm group-hover:scale-105 transition-transform">
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+              </svg>
             </div>
-            <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-indigo-500 dark:from-white dark:to-blue-400 bg-clip-text text-transparent">
+            <span className="text-xl font-bold tracking-tight text-foreground">
               PrepPath
             </span>
           </div>
 
           {/* Centered Tab Links (Desktop) */}
-          <div className="hidden md:flex items-center gap-1 bg-slate-100/60 dark:bg-[#1e293b]/60 p-1.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/80">
+          <div className="hidden md:flex items-center gap-1 bg-secondary p-1 rounded border border-border">
             {[
               { id: "dashboard", label: "Dashboard" },
               { id: "mock-interview", label: "Mock Interview" },
@@ -586,10 +592,10 @@ export default function UserDashboard() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`nav-link px-4 py-2 text-xs font-bold rounded-xl transition ${
+                className={`nav-link px-4 py-2 text-xs font-bold rounded transition ${
                   activeTab === tab.id
-                    ? "bg-white dark:bg-[#334155] text-blue-600 dark:text-white shadow-sm"
-                    : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
+                    ? "bg-card text-primary shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {tab.label}
@@ -602,15 +608,15 @@ export default function UserDashboard() {
             
             <button
               onClick={handleToggleTheme}
-              className="p-2.5 rounded-xl border border-slate-200/50 dark:border-[#334155]/30 bg-white/50 dark:bg-[#1e293b]/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              className="p-2.5 rounded border border-border bg-card hover:bg-secondary transition"
               title={theme === "dark" ? "Light Mode" : "Dark Mode"}
             >
               {theme === "dark" ? (
-                <svg className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-4 h-4 text-amber-450" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 14.05a1 1 0 011.414 0l.707.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zm-.707-8.485a1 1 0 010-1.414l.707-.707a1 1 0 111.414 1.414l-.707.707a1 1 0 01-1.414 0zM4 11a1 1 0 100-2H3a1 1 0 100 2h1z"/>
                 </svg>
               ) : (
-                <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
                 </svg>
               )}
@@ -622,22 +628,22 @@ export default function UserDashboard() {
                 aria-label="Open account menu"
                 aria-haspopup="menu"
                 onClick={() => setAvatarDropdownActive(!avatarDropdownActive)}
-                className="flex items-center gap-1.5 p-1 rounded-xl border border-slate-200/50 dark:border-[#334155]/30 bg-white/50 dark:bg-[#1e293b]/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                className="flex items-center gap-1.5 p-1 rounded border border-border bg-card hover:bg-secondary transition"
               >
-                <UserAvatar avatarUrl={profile.avatarUrl} name={profile.name || session.user.name || undefined} className="h-7 w-7 rounded-lg" />
-                <svg className="w-3.5 h-3.5 text-slate-500 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <UserAvatar avatarUrl={profile.avatarUrl} name={profile.name || session.user.name || undefined} className="h-7 w-7 rounded" />
+                <svg className="w-3.5 h-3.5 text-muted-foreground hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.3" d="M19 9l-7 7-7-7"/>
                 </svg>
               </button>
 
               {avatarDropdownActive && (
-                <div className="absolute right-0 mt-2 w-64 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1e293b] shadow-2xl p-2 z-55">
-                  <div className="p-3 border-b border-slate-100 dark:border-slate-800">
-                    <p className="font-bold text-sm text-slate-900 dark:text-white leading-tight">{profile.name || session.user.name}</p>
-                    <p className="text-[11px] text-slate-400 font-mono mt-0.5 truncate">{session.user.email}</p>
-                    {profile.role && <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-1 truncate">{profile.role}</p>}
-                    {profile.college && <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-0.5 truncate">{profile.college}</p>}
-                    <span className="inline-block mt-2 px-2 py-0.5 text-[10px] font-bold rounded bg-blue-500/10 text-blue-500 dark:text-blue-400 uppercase tracking-wider">Pro Access</span>
+                <div className="absolute right-0 mt-2 w-64 rounded border border-border bg-card shadow-lg p-2 z-55">
+                  <div className="p-3 border-b border-border">
+                    <p className="font-bold text-sm text-foreground leading-tight">{profile.name || session.user.name}</p>
+                    <p className="text-[11px] text-muted-foreground font-mono mt-0.5 truncate">{session.user.email}</p>
+                    {profile.role && <p className="text-[10px] text-muted-foreground font-medium mt-1 truncate">{profile.role}</p>}
+                    {profile.college && <p className="text-[10px] text-muted-foreground font-medium mt-0.5 truncate">{profile.college}</p>}
+                    <span className="inline-block mt-2 px-2 py-0.5 text-[10px] font-bold rounded bg-primary/10 text-primary uppercase tracking-wider">Pro Access</span>
                   </div>
                   <div className="p-1 space-y-1">
                     <button
@@ -645,16 +651,16 @@ export default function UserDashboard() {
                         setActiveTab("profile");
                         setAvatarDropdownActive(false);
                       }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition text-slate-705 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-left"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded text-xs font-bold transition text-foreground hover:bg-secondary text-left"
                     >
-                      <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                       </svg>
                       View Profile Details
                     </button>
                     <button
                       onClick={() => signOut({ callbackUrl: "/" })}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition text-red-650 hover:bg-red-50 dark:hover:bg-red-500/10 text-left"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded text-xs font-bold transition text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/15 text-left"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
@@ -670,13 +676,13 @@ export default function UserDashboard() {
         </div>
 
         {/* Mobile Navigation Tab Bar */}
-        <div className="md:hidden mt-3 flex flex-wrap justify-around border-t border-slate-100 dark:border-[#334155] pt-2 gap-y-1">
-          <button onClick={() => setActiveTab("dashboard")} className={`text-[10px] font-bold py-1 px-2.5 rounded-lg ${activeTab === "dashboard" ? "bg-blue-600 text-white" : "text-slate-500"}`}>Dashboard</button>
-          <button onClick={() => setActiveTab("mock-interview")} className={`text-[10px] font-bold py-1 px-2.5 rounded-lg ${activeTab === "mock-interview" ? "bg-blue-600 text-white" : "text-slate-500"}`}>Mock</button>
-          <button onClick={() => setActiveTab("resume")} className={`text-[10px] font-bold py-1 px-2.5 rounded-lg ${activeTab === "resume" ? "bg-blue-600 text-white" : "text-slate-500"}`}>Resume</button>
-          <button onClick={() => setActiveTab("dsa")} className={`text-[10px] font-bold py-1 px-2.5 rounded-lg ${activeTab === "dsa" ? "bg-blue-600 text-white" : "text-slate-500"}`}>DSA</button>
-          <button onClick={() => setActiveTab("aptitude")} className={`text-[10px] font-bold py-1 px-2.5 rounded-lg ${activeTab === "aptitude" ? "bg-blue-600 text-white" : "text-slate-500"}`}>Aptitude</button>
-          <button onClick={() => setActiveTab("profile")} className={`text-[10px] font-bold py-1 px-2.5 rounded-lg ${activeTab === "profile" ? "bg-blue-600 text-white" : "text-slate-500"}`}>Profile</button>
+        <div className="md:hidden mt-3 flex flex-wrap justify-around border-t border-border pt-2 gap-y-1">
+          <button onClick={() => setActiveTab("dashboard")} className={`text-[10px] font-bold py-1 px-2.5 rounded ${activeTab === "dashboard" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>Dashboard</button>
+          <button onClick={() => setActiveTab("mock-interview")} className={`text-[10px] font-bold py-1 px-2.5 rounded ${activeTab === "mock-interview" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>Mock</button>
+          <button onClick={() => setActiveTab("resume")} className={`text-[10px] font-bold py-1 px-2.5 rounded ${activeTab === "resume" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>Resume</button>
+          <button onClick={() => setActiveTab("dsa")} className={`text-[10px] font-bold py-1 px-2.5 rounded ${activeTab === "dsa" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>DSA</button>
+          <button onClick={() => setActiveTab("aptitude")} className={`text-[10px] font-bold py-1 px-2.5 rounded ${activeTab === "aptitude" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>Aptitude</button>
+          <button onClick={() => setActiveTab("profile")} className={`text-[10px] font-bold py-1 px-2.5 rounded ${activeTab === "profile" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>Profile</button>
         </div>
       </nav>
 

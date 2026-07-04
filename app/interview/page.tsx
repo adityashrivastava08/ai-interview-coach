@@ -367,38 +367,42 @@ function InterviewContent() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a] text-[#0f172a] dark:text-[#f1f5f9] font-sans p-4 md:p-8 flex flex-col justify-between">
+    <div className="min-h-screen bg-background text-foreground font-sans p-4 md:p-8 flex flex-col justify-between relative">
+      {/* Editorial Decorative Grid Lines */}
+      <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden opacity-[0.2] dark:opacity-[0.1]">
+        <div className="absolute left-[50%] top-0 h-full w-[1px] bg-border" />
+      </div>
       
       {/* =========================================================
           ⚡ ATTRACTIVE TRANSPARENT GLASSMORPHIC HEADER PANEL
          ========================================================= */}
-      <header className="sticky top-0 z-50 px-4 md:px-8 py-4 bg-slate-50/40 dark:bg-[#0f172a]/40 border-b border-slate-200/50 dark:border-[#334155]/30 backdrop-blur-xl transition-all duration-300 rounded-3xl mb-6">
+      <header className="sticky top-0 z-50 px-4 md:px-8 py-4 bg-card/85 border border-border backdrop-blur-xl transition-all duration-300 rounded-lg mb-6 shadow-sm">
         <div className="flex justify-between items-center w-full">
           <div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-500 dark:from-white dark:to-blue-400 bg-clip-text text-transparent">
+            <h1 className="text-xl font-serif font-bold text-foreground">
               PrepPath Live Simulator
             </h1>
-            <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-wider font-mono">
-              Track: <span className="text-blue-600 dark:text-blue-400 font-bold">{track.replace("-", " ").toUpperCase()}</span>
+            <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wider font-mono">
+              Track: <span className="text-primary font-bold">{track.replace("-", " ").toUpperCase()}</span>
             </p>
           </div>
           
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 text-xs font-bold font-mono bg-white/50 dark:bg-slate-850 px-3.5 py-1.5 rounded-xl border border-slate-200/50 dark:border-slate-800">
-              <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex items-center gap-2 text-xs font-bold font-mono bg-background px-3.5 py-1.5 rounded border border-border">
+              <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
               <span id="interview-timer">{formatTime(timeLeft)}</span>
             </div>
 
-            <div className="live-indicator text-[10px] font-bold font-mono bg-red-500/10 border border-red-500/20 px-3.5 py-1.5 rounded-xl text-red-500">
+            <div className="live-indicator text-[10px] font-bold font-mono bg-destructive/10 border border-destructive/20 px-3.5 py-1.5 rounded text-destructive">
               LIVE
             </div>
 
             {session && (
-              <div className="flex items-center gap-2 p-1 rounded-xl border border-slate-200/50 dark:border-[#334155]/30 bg-white/50 dark:bg-[#1e293b]/50">
-                <UserAvatar avatarUrl={profile.avatarUrl} name={profile.name || session.user?.name || ""} className="h-7 w-7 rounded-lg" />
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 pr-2 hidden sm:inline">
+              <div className="flex items-center gap-2 p-1 rounded border border-border bg-background">
+                <UserAvatar avatarUrl={profile.avatarUrl} name={profile.name || session.user?.name || ""} className="h-7 w-7 rounded" />
+                <span className="text-xs font-bold text-foreground pr-2 hidden sm:inline">
                   {profile.name || session.user?.name}
                 </span>
               </div>
@@ -411,20 +415,18 @@ function InterviewContent() {
       <main className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch mb-6">
         
         {/* Left Section: Video / AI Screen */}
-        <section className="card p-6 flex flex-col justify-between bg-white dark:bg-[#1e293b]">
+        <section className="card p-6 flex flex-col justify-between bg-card">
           
-          <div className="flex-1 rounded-2xl flex flex-col items-center justify-center bg-slate-50 dark:bg-[#0f172a] border border-slate-200 dark:border-[#334155] p-8 relative overflow-hidden min-h-[300px]">
-            <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-blue-500/5 dark:bg-blue-500/10 blur-[40px]" />
-            
+          <div className="flex-1 rounded flex flex-col items-center justify-center bg-background border border-border p-8 relative overflow-hidden min-h-[300px]">
             <div className="text-center relative z-10 w-full">
               {/* Interviewer avatar */}
-              <div className="w-24 h-24 rounded-full mx-auto mb-4 flex items-center justify-center bg-gradient-to-tr from-blue-600 to-indigo-500 shadow-xl shadow-blue-500/20 border-4 border-white dark:border-slate-800">
-                <svg className="w-11 h-11 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-24 h-24 rounded-full mx-auto mb-4 flex items-center justify-center bg-primary shadow-md border-4 border-card">
+                <svg className="w-11 h-11 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.1" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                 </svg>
               </div>
-              <h3 className="font-extrabold text-slate-800 dark:text-white text-base">AI Interviewer Portal</h3>
-              <p className="text-xs text-slate-400 capitalize font-mono mt-1">{difficulty} round parameters active</p>
+              <h3 className="font-bold text-foreground text-base">AI Interviewer Portal</h3>
+              <p className="text-xs text-muted-foreground capitalize font-mono mt-1">{difficulty} round parameters active</p>
 
               {/* Volume voice control indicator */}
               <button
@@ -439,10 +441,10 @@ function InterviewContent() {
                     if (lastModelMsg) speakText(lastModelMsg.content);
                   }
                 }}
-                className={`mt-5 px-3 py-1.5 rounded-xl border text-[10px] font-bold font-mono transition-all flex items-center gap-1.5 mx-auto cursor-pointer ${
+                className={`mt-5 px-3 py-1.5 rounded border text-[10px] font-bold font-mono transition-all flex items-center gap-1.5 mx-auto cursor-pointer ${
                   voiceMuted
-                    ? "bg-red-500/10 border-red-500/20 text-red-500 hover:bg-red-500/20"
-                    : "bg-blue-500/10 border-blue-500/25 text-blue-650 dark:text-blue-400 hover:bg-blue-500/20"
+                    ? "bg-destructive/10 border-destructive/20 text-destructive hover:bg-destructive/20"
+                    : "bg-secondary border-border text-foreground hover:opacity-90"
                 }`}
               >
                 {voiceMuted ? (
@@ -455,7 +457,7 @@ function InterviewContent() {
                   </>
                 ) : (
                   <>
-                    <svg className="w-3.5 h-3.5 animate-pulse text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3.5 h-3.5 animate-pulse text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
                     </svg>
                     Speech Synth: Speaking
@@ -470,10 +472,10 @@ function InterviewContent() {
             <div className="flex gap-2">
               <button
                 onClick={() => setMicActive(!micActive)}
-                className={`p-3 rounded-xl border transition cursor-pointer ${
+                className={`p-3 rounded border transition cursor-pointer ${
                   micActive 
-                    ? "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100" 
-                    : "bg-red-500/15 border-red-500/20 text-red-500 hover:bg-red-500/20"
+                    ? "bg-background border-border text-foreground hover:bg-secondary" 
+                    : "bg-destructive/15 border-destructive/20 text-destructive hover:bg-destructive/20"
                 }`}
                 title="Toggle Microphone"
               >
@@ -490,10 +492,10 @@ function InterviewContent() {
 
               <button
                 onClick={() => setCameraActive(!cameraActive)}
-                className={`p-3 rounded-xl border transition cursor-pointer ${
+                className={`p-3 rounded border transition cursor-pointer ${
                   cameraActive 
-                    ? "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100" 
-                    : "bg-red-500/15 border-red-500/20 text-red-500 hover:bg-red-500/20"
+                    ? "bg-background border-border text-foreground hover:bg-secondary" 
+                    : "bg-destructive/15 border-destructive/20 text-destructive hover:bg-destructive/20"
                 }`}
                 title="Toggle Web Camera"
               >
@@ -512,7 +514,7 @@ function InterviewContent() {
             <button
               onClick={handleEndInterview}
               disabled={isSaving || messages.length === 0}
-              className="px-4 py-2.5 rounded-xl text-xs font-bold transition bg-red-500 hover:bg-red-600 disabled:opacity-40 text-white flex items-center gap-1.5 cursor-pointer shadow-md shadow-red-500/10"
+              className="px-4 py-2.5 rounded text-xs font-bold transition bg-destructive hover:opacity-90 disabled:opacity-40 text-white flex items-center gap-1.5 cursor-pointer shadow-sm"
             >
               {isSaving ? "Evaluating Session..." : "End & Evaluate Interview ⏹️"}
             </button>
@@ -521,10 +523,10 @@ function InterviewContent() {
         </section>
 
         {/* Right Section: Active Question Dialogue & Text Response */}
-        <section className="card p-6 flex flex-col justify-between bg-white dark:bg-[#1e293b]">
+        <section className="card p-6 flex flex-col justify-between bg-card">
           
           <div className="mb-4">
-            <span className="text-[10px] font-bold font-mono tracking-wider text-blue-600 dark:text-blue-400 bg-blue-500/10 px-3.5 py-1.5 rounded-xl">
+            <span className="text-[10px] font-bold font-mono tracking-wider text-primary bg-secondary px-3.5 py-1.5 rounded border border-border">
               Turn Sequence: Question {questionIndex}
             </span>
           </div>
@@ -533,10 +535,10 @@ function InterviewContent() {
           <div className="flex-1 overflow-y-auto space-y-4 pr-1 my-3 scrollbar-thin max-h-[350px]">
             {messages.map((msg, idx) => (
               <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-xs leading-relaxed transition shadow-sm ${
+                <div className={`max-w-[85%] rounded px-4 py-3 text-xs leading-relaxed transition shadow-sm ${
                   msg.role === "user"
-                    ? "bg-blue-600 text-white rounded-tr-none"
-                    : "bg-slate-100 dark:bg-[#0f172a] text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-800 rounded-tl-none font-semibold"
+                    ? "bg-primary text-primary-foreground rounded-tr-none"
+                    : "bg-secondary text-foreground border border-border rounded-tl-none font-medium"
                 }`}>
                   <p className="whitespace-pre-line">{msg.content}</p>
                 </div>
@@ -545,12 +547,12 @@ function InterviewContent() {
 
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-slate-100 dark:bg-[#0f172a] text-slate-400 max-w-[80%] rounded-2xl rounded-tl-none px-4 py-3.5 text-xs shadow-sm border border-slate-200 dark:border-slate-800 flex items-center gap-2">
+                <div className="bg-secondary text-muted-foreground max-w-[80%] rounded rounded-tl-none px-4 py-3.5 text-xs shadow-sm border border-border flex items-center gap-2">
                   <span className="italic font-mono text-[10px] animate-pulse">AI Interviewer is formulating question</span>
                   <div className="flex gap-1.5">
-                    <span className="h-1.5 w-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></span>
-                    <span className="h-1.5 w-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></span>
-                    <span className="h-1.5 w-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></span>
+                    <span className="h-1.5 w-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></span>
+                    <span className="h-1.5 w-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></span>
+                    <span className="h-1.5 w-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></span>
                   </div>
                 </div>
               </div>
@@ -559,10 +561,10 @@ function InterviewContent() {
           </div>
 
           {/* Response formulation text editor */}
-          <form onSubmit={handleSendAnswer} className="border-t border-slate-100 dark:border-slate-800 pt-4">
-            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 relative group mb-3">
+          <form onSubmit={handleSendAnswer} className="border-t border-border pt-4">
+            <div className="p-4 rounded border border-border bg-background relative group mb-3">
               <div className="flex items-center justify-between mb-2">
-                <label className="text-xs font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                <label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
                   Your Response
                 </label>
                 
@@ -570,15 +572,15 @@ function InterviewContent() {
                 <button
                   type="button"
                   onClick={toggleListening}
-                  className={`cursor-pointer flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold font-mono transition-all border ${
+                  className={`cursor-pointer flex items-center gap-2 px-3 py-1.5 rounded text-xs font-bold font-mono transition-all border ${
                     isListening
-                      ? "bg-red-500/10 border-red-500/30 text-red-650 dark:text-red-400 animate-pulse"
-                      : "bg-slate-100 dark:bg-white/5 border-slate-300 dark:border-white/5 text-slate-700 dark:text-slate-300 hover:border-cyan-500/30 hover:text-cyan-600 dark:hover:text-cyan-400"
+                      ? "bg-destructive/10 border-destructive/30 text-destructive animate-pulse"
+                      : "bg-secondary border-border text-foreground hover:bg-secondary/85"
                   }`}
                 >
                   {isListening ? (
                     <>
-                      <span className="h-2 w-2 rounded-full bg-red-500 animate-ping"></span>
+                      <span className="h-2 w-2 rounded-full bg-destructive animate-ping"></span>
                       <span>Listening... (Click to Stop)</span>
                     </>
                   ) : (
@@ -594,8 +596,8 @@ function InterviewContent() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 disabled={isLoading || isSaving}
-                placeholder={isListening ? "Bolna shuru karein, AI live type kar raha hai..." : "Type your response here or click 'Speak Answer' to use voice..."}
-                className="w-full h-36 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all text-slate-800 dark:text-slate-100 placeholder-slate-450 dark:placeholder-slate-650 resize-none disabled:opacity-50"
+                placeholder={isListening ? "Bolna shuru karein, AI type kar raha hai..." : "Type your response here or click 'Speak Answer' to use voice..."}
+                className="w-full h-36 bg-background border border-border rounded p-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all text-foreground placeholder-muted-foreground resize-none disabled:opacity-50"
               />
             </div>
             
@@ -624,7 +626,7 @@ function InterviewContent() {
       </main>
 
       {/* Footer */}
-      <footer className="text-center text-[10px] font-mono text-slate-400 dark:text-slate-500 py-3 border-t border-slate-200 dark:border-slate-850">
+      <footer className="text-center text-[10px] font-mono text-muted-foreground py-3 border-t border-border">
         © 2026 PrepPath placement simulation sandbox. Evaluate securely.
       </footer>
 
@@ -635,8 +637,8 @@ function InterviewContent() {
 export default function InterviewPage() {
   return (
     <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-[#0f172a] font-mono text-xs tracking-widest text-slate-400">
-        LOADING ACTIVE SIMULATOR...
+      <div className="flex min-h-screen items-center justify-center bg-background font-sans text-xs tracking-widest text-muted-foreground uppercase">
+        Loading Active Simulator...
       </div>
     }>
       <InterviewContent />
