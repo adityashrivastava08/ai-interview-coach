@@ -75,7 +75,7 @@ export default function UserDashboard() {
   // ⚙️ CORE STATE HOOKS BLOCK
   // ==========================================
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [theme, setTheme] = useState("light");
+  const [theme, setTheme] = useState("dark");
   const [avatarDropdownActive, setAvatarDropdownActive] = useState(false);
 
   // History & Statistics state
@@ -199,7 +199,7 @@ export default function UserDashboard() {
   // 🌓 THEME CONTROL LAYER
   // ==========================================
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") || "light";
+    const savedTheme = localStorage.getItem("theme") || "dark";
     setTheme(savedTheme);
     if (savedTheme === "dark") {
       document.documentElement.classList.add("dark");
@@ -591,7 +591,13 @@ export default function UserDashboard() {
             ].map(tab => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  if (tab.id === "dsa") {
+                    router.push("/dsa");
+                  } else {
+                    setActiveTab(tab.id);
+                  }
+                }}
                 className={`nav-link px-4 py-2 text-xs font-bold rounded transition ${
                   activeTab === tab.id
                     ? "bg-card text-primary shadow-sm"
@@ -680,7 +686,7 @@ export default function UserDashboard() {
           <button onClick={() => setActiveTab("dashboard")} className={`text-[10px] font-bold py-1 px-2.5 rounded ${activeTab === "dashboard" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>Dashboard</button>
           <button onClick={() => setActiveTab("mock-interview")} className={`text-[10px] font-bold py-1 px-2.5 rounded ${activeTab === "mock-interview" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>Mock</button>
           <button onClick={() => setActiveTab("resume")} className={`text-[10px] font-bold py-1 px-2.5 rounded ${activeTab === "resume" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>Resume</button>
-          <button onClick={() => setActiveTab("dsa")} className={`text-[10px] font-bold py-1 px-2.5 rounded ${activeTab === "dsa" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>DSA</button>
+          <button onClick={() => router.push("/dsa")} className={`text-[10px] font-bold py-1 px-2.5 rounded ${activeTab === "dsa" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>DSA</button>
           <button onClick={() => setActiveTab("aptitude")} className={`text-[10px] font-bold py-1 px-2.5 rounded ${activeTab === "aptitude" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>Aptitude</button>
           <button onClick={() => setActiveTab("profile")} className={`text-[10px] font-bold py-1 px-2.5 rounded ${activeTab === "profile" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>Profile</button>
         </div>

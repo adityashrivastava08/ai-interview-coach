@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
-// @ts-ignore: CSS module type declarations may not be present in this repo setup
 import "./globals.css";
 import AuthProvider from "@/components/AuthProvider"; // Import our new session layer
 
@@ -27,7 +26,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${jakarta.variable} ${playfair.variable} h-full`}>
+    <html lang="en" className={`${jakarta.variable} ${playfair.variable} h-full dark`} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const savedTheme = localStorage.getItem('theme') || 'dark';
+                  if (savedTheme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className="font-sans min-h-full bg-background text-foreground antialiased">
         {/* Wrapping children inside AuthProvider lets every page know who is signed in */}
         <AuthProvider>

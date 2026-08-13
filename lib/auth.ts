@@ -53,7 +53,11 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async redirect({ url, baseUrl }) {
       if (url.startsWith("/")) return `${baseUrl}${url}`;
-      else if (new URL(url).origin === baseUrl) return url;
+      try {
+        if (new URL(url).origin === baseUrl) return url;
+      } catch {
+        // Fallback if URL is invalid or relative without leading slash
+      }
       return baseUrl;
     },
 
